@@ -24,7 +24,7 @@ export default function Builder() {
       if (!res.ok) {
         const txt = await res.text();
         console.error("Erreur API generate-site:", res.status, txt);
-        setError("Erreur serveur (generate-site). Regarde les logs Vercel.");
+        setError("Erreur serveur. (API generate-site)");
         return;
       }
 
@@ -35,12 +35,11 @@ export default function Builder() {
       }
 
       setUrl(json.url);
-
-      // redirection automatique vers la page du site
+      // redirection automatique
       window.location.href = json.url;
     } catch (err) {
       console.error("Erreur JS dans le builder:", err);
-      setError("Erreur inattendue côté navigateur.");
+      setError("Erreur inattendue dans le navigateur.");
     } finally {
       setLoading(false);
     }
