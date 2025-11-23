@@ -1,341 +1,366 @@
-"use client";
-
 // app/page.jsx
-import Link from "next/link";
-import Image from "next/image";
+
+export const metadata = {
+  title: "Site pour professionnels à 1 € | Spectra Media AI",
+  description:
+    "Une page professionnelle pour votre activité, avec formulaire de contact et assistant Betty en option, pour 1 € par mois.",
+};
 
 export default function Home() {
   return (
-    <main className="home-root">
-      <div className="hero">
-        {/* Bandeau logos */}
-        <div className="hero-top">
-          <div className="hero-logo-left">
-            <Image
-              src="/spectra_media_logo.png"
-              alt="Spectra Media AI"
-              width={160}
-              height={40}
-            />
-          </div>
-          <div className="hero-logo-right">
-            <span className="betty-pill">BETTY BOTS</span>
-          </div>
+    <main
+      style={{
+        minHeight: "100vh",
+        margin: 0,
+        padding: 0,
+        background:
+          "radial-gradient(circle at top, rgba(37,99,235,0.35), #020617 55%, #000000 100%)",
+        color: "#f9fafb",
+        fontFamily:
+          "-apple-system, BlinkMacSystemFont, system-ui, 'SF Pro Text', 'Inter', sans-serif",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      {/* HEADER */}
+      <header
+        style={{
+          width: "100%",
+          padding: "20px 40px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        {/* Logo Spectra Media AI */}
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <img
+            src="/spectra_media_logo.png"
+            alt="Spectra Media AI"
+            style={{
+              height: "58px",
+              objectFit: "contain",
+              filter: "drop-shadow(0 0 18px rgba(59,130,246,0.7))",
+            }}
+          />
         </div>
 
-        {/* Cercle + titre central */}
-        <div className="hero-center">
-          <div className="hero-circle">
-            <h1>
-              <span>Site pour</span>
-              <span>professionnels</span>
-              <span>à 1&nbsp;€</span>
-            </h1>
-            <p className="hero-sub">= abonnement mensuel, résiliable à tout moment</p>
-          </div>
-        </div>
+        {/* Bouton Betty Bots */}
+        <a
+          href="https://www.spectramedia.online/"
+          style={{
+            padding: "10px 26px",
+            borderRadius: "999px",
+            border: "1px solid rgba(96,165,250,0.9)",
+            color: "#e5f0ff",
+            fontSize: "14px",
+            letterSpacing: "0.08em",
+            textDecoration: "none",
+            textTransform: "uppercase",
+            backdropFilter: "blur(8px)",
+            background:
+              "radial-gradient(circle at top, rgba(37,99,235,0.45), rgba(15,23,42,0.9))",
+            boxShadow: "0 0 22px rgba(37,99,235,0.7)",
+          }}
+        >
+          BETTY BOTS
+        </a>
+      </header>
 
-        {/* Aperçu écran + CTA */}
-        <div className="hero-bottom">
-          <div className="hero-mock">
-            <div className="hero-mock-top">
-              <div className="hero-mock-tab active">Votre activité</div>
-              <div className="hero-mock-tab">Avis</div>
-              <div className="hero-mock-tab">Contact</div>
-            </div>
-            <div className="hero-mock-body">
-              <div className="hero-mock-col">
-                <h3>Présentez votre activité</h3>
-                <p>
-                  Une page claire, avec votre texte, vos coordonnées et un
-                  formulaire qui vous envoie les messages directement par email.
-                </p>
-              </div>
-              <div className="hero-mock-col">
-                <h3>Gagnez des clients</h3>
-                <p>
-                  Vos clients vous trouvent, vous écrivent, et vous gardez la
-                  main sur la relation.
-                </p>
-              </div>
-              <div className="hero-mock-col">
-                <h3>Assistant Betty (option)</h3>
-                <p>
-                  Ajoutez une Betty métier qui répond 24/7 et qualifie les demandes
-                  comme sur votre offre actuelle.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="hero-cta">
-            <Link href="/builder" className="hero-button-primary">
-              Créer mon site à 1&nbsp;€
-            </Link>
-            <p className="hero-cta-note">
-              1. Vous remplissez le formulaire &nbsp;&nbsp;•&nbsp;&nbsp; 2. Paiement sécurisé
-              Stripe &nbsp;&nbsp;•&nbsp;&nbsp; 3. Votre page + Betty (si choisie) sont générées.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Petit bloc rassurance sous le hero */}
-      <section className="section-steps">
-        <div className="step">
-          <span className="step-index">01</span>
-          <h3>Configuration ultra simple</h3>
-          <p>Nom de votre enseigne, adresse, téléphone, email, métier.</p>
-        </div>
-        <div className="step">
-          <span className="step-index">02</span>
-          <h3>Paiement mensuel à 1&nbsp;€</h3>
-          <p>Abonnement Stripe, sans engagement, facturation claire.</p>
-        </div>
-        <div className="step">
-          <span className="step-index">03</span>
-          <h3>Page en ligne + messages par email</h3>
-          <p>
-            Vous recevez directement les messages de votre mini-site, comme avec
-            vos Betty métier.
+      {/* HERO */}
+      <section
+        style={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          padding: "40px 16px 72px",
+        }}
+      >
+        {/* Cercle / halo */}
+        <div
+          style={{
+            width: "min(720px, 100%)",
+            padding: "72px 32px 80px",
+            borderRadius: "999px",
+            border: "1px solid rgba(148,163,184,0.35)",
+            background:
+              "radial-gradient(circle at top, rgba(37,99,235,0.3), rgba(15,23,42,0.92))",
+            boxShadow:
+              "0 0 80px rgba(37,99,235,0.58), 0 0 160px rgba(15,23,42,0.9)",
+            textAlign: "center",
+          }}
+        >
+          <p
+            style={{
+              fontSize: "14px",
+              textTransform: "uppercase",
+              letterSpacing: "0.2em",
+              color: "rgba(148,163,184,0.9)",
+              marginBottom: "18px",
+            }}
+          >
+            SPECTRA MEDIA AI
           </p>
+
+          <h1
+            style={{
+              fontSize: "clamp(34px, 4vw, 40px)",
+              lineHeight: 1.2,
+              fontWeight: 600,
+              margin: "0 0 18px",
+            }}
+          >
+            Site pour professionnels
+            <br />
+            à&nbsp;1&nbsp;€
+          </h1>
+
+          <p
+            style={{
+              fontSize: "15px",
+              color: "rgba(209,213,219,0.9)",
+              marginBottom: "32px",
+            }}
+          >
+            Abonnement mensuel, résiliable à tout moment.
+            <br />
+            Votre page claire, vos coordonnées, un formulaire de contact
+            <span style={{ opacity: 0.9 }}> – assistant Betty en option.</span>
+          </p>
+
+          {/* CTA principal */}
+          <a
+            href="/builder"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "14px 32px",
+              borderRadius: "999px",
+              border: "none",
+              background:
+                "linear-gradient(90deg, #4f46e5 0%, #6366f1 40%, #0ea5e9 100%)",
+              color: "#f9fafb",
+              fontSize: "16px",
+              fontWeight: 600,
+              textDecoration: "none",
+              boxShadow:
+                "0 0 28px rgba(79,70,229,0.7), 0 0 60px rgba(14,165,233,0.6)",
+              cursor: "pointer",
+            }}
+          >
+            Créer mon site professionnel pour 1&nbsp;€
+          </a>
+
+          <p
+            style={{
+              marginTop: "12px",
+              fontSize: "12px",
+              color: "rgba(148,163,184,0.9)",
+            }}
+          >
+            Paiement sécurisé via Stripe • Mise en ligne automatique après
+            validation.
+          </p>
+        </div>
+
+        {/* Bandeau / Tabs */}
+        <div
+          style={{
+            marginTop: "60px",
+            width: "min(1040px, 100%)",
+            borderRadius: "26px",
+            background: "rgba(15,23,42,0.9)",
+            border: "1px solid rgba(30,64,175,0.7)",
+            boxShadow: "0 32px 80px rgba(15,23,42,0.8)",
+            overflow: "hidden",
+          }}
+        >
+          {/* Onglets (statique pour l’instant) */}
+          <div
+            style={{
+              display: "flex",
+              gap: "12px",
+              padding: "12px 18px",
+              borderBottom: "1px solid rgba(31,41,55,0.9)",
+              background:
+                "radial-gradient(circle at top, rgba(37,99,235,0.35), rgba(15,23,42,0.98))",
+            }}
+          >
+            <button
+              type="button"
+              style={{
+                padding: "8px 18px",
+                borderRadius: "999px",
+                border: "none",
+                fontSize: "14px",
+                cursor: "default",
+                background:
+                  "linear-gradient(90deg, rgba(37,99,235,0.9), rgba(56,189,248,0.7))",
+                color: "#f9fafb",
+                fontWeight: 500,
+              }}
+            >
+              Votre activité
+            </button>
+            <button
+              type="button"
+              style={{
+                padding: "8px 16px",
+                borderRadius: "999px",
+                border: "1px solid rgba(55,65,81,0.9)",
+                background: "transparent",
+                color: "rgba(156,163,175,0.9)",
+                fontSize: "14px",
+                cursor: "default",
+              }}
+            >
+              Avis
+            </button>
+            <button
+              type="button"
+              style={{
+                padding: "8px 16px",
+                borderRadius: "999px",
+                border: "1px solid rgba(55,65,81,0.9)",
+                background: "transparent",
+                color: "rgba(156,163,175,0.9)",
+                fontSize: "14px",
+                cursor: "default",
+              }}
+            >
+              Contact
+            </button>
+          </div>
+
+          {/* Contenu des “onglets” */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+              gap: "28px",
+              padding: "26px 28px 32px",
+            }}
+          >
+            {/* Bloc 1 */}
+            <div>
+              <h3
+                style={{
+                  fontSize: "17px",
+                  fontWeight: 600,
+                  marginBottom: "8px",
+                }}
+              >
+                Présentez votre activité
+              </h3>
+              <p
+                style={{
+                  fontSize: "14px",
+                  color: "rgba(209,213,219,0.9)",
+                  lineHeight: 1.6,
+                }}
+              >
+                Une page claire, avec votre texte, vos coordonnées,
+                <br />
+                votre photo ou logo, et un design professionnel
+                <br />
+                adapté à votre métier.
+              </p>
+            </div>
+
+            {/* Bloc 2 */}
+            <div>
+              <h3
+                style={{
+                  fontSize: "17px",
+                  fontWeight: 600,
+                  marginBottom: "8px",
+                }}
+              >
+                Gagnez des clients
+              </h3>
+              <p
+                style={{
+                  fontSize: "14px",
+                  color: "rgba(209,213,219,0.9)",
+                  lineHeight: 1.6,
+                }}
+              >
+                Vos clients vous trouvent, vous écrivent via le
+                <br />
+                formulaire, et vous gardez la main sur la relation.
+                <br />
+                Tous les messages arrivent dans votre boîte mail.
+              </p>
+            </div>
+
+            {/* Bloc 3 */}
+            <div>
+              <h3
+                style={{
+                  fontSize: "17px",
+                  fontWeight: 600,
+                  marginBottom: "8px",
+                }}
+              >
+                Assistant Betty (option)
+              </h3>
+              <p
+                style={{
+                  fontSize: "14px",
+                  color: "rgba(209,213,219,0.9)",
+                  lineHeight: 1.6,
+                }}
+              >
+                Ajoutez une Betty métier qui répond 24/7,
+                <br />
+                qualifie les demandes et vous envoie un résumé
+                <br />
+                par email – comme sur l’abonnement Betty classique.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Mini rappel CTA */}
+        <div
+          style={{
+            marginTop: "30px",
+            textAlign: "center",
+            fontSize: "13px",
+            color: "rgba(148,163,184,0.9)",
+          }}
+        >
+          <span style={{ opacity: 0.9 }}>
+            Prêt&nbsp;? Cliquez sur le bouton ci-dessus ou
+          </span>{" "}
+          <a
+            href="/builder"
+            style={{
+              color: "#a855f7",
+              textDecoration: "underline",
+              textDecorationThickness: "1px",
+            }}
+          >
+            allez directement au formulaire de création
+          </a>
+          .
         </div>
       </section>
 
-      <style jsx>{`
-        .home-root {
-          min-height: 100vh;
-          background: radial-gradient(circle at top, #0b1120 0%, #020617 55%, #000 100%);
-          color: #f9fafb;
-          font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
-            "Inter", sans-serif;
-        }
-
-        .hero {
-          max-width: 1120px;
-          margin: 0 auto;
-          padding: 40px 16px 72px;
-        }
-
-        .hero-top {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          margin-bottom: 32px;
-        }
-
-        .hero-logo-right {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
-
-        .betty-pill {
-          padding: 8px 18px;
-          border-radius: 999px;
-          border: 1px solid rgba(96, 165, 250, 0.7);
-          color: #e5f0ff;
-          font-size: 13px;
-          letter-spacing: 0.12em;
-          text-transform: uppercase;
-          box-shadow: 0 0 12px rgba(59, 130, 246, 0.6);
-        }
-
-        .hero-center {
-          display: flex;
-          justify-content: center;
-          margin-bottom: 40px;
-        }
-
-        .hero-circle {
-          border-radius: 999px;
-          border: 1px solid rgba(148, 163, 184, 0.6);
-          box-shadow: 0 0 90px rgba(59, 130, 246, 0.4);
-          padding: 56px 40px 32px;
-          text-align: center;
-          max-width: 520px;
-        }
-
-        .hero-circle h1 {
-          margin: 0;
-          font-weight: 500;
-          line-height: 1.15;
-          font-size: 34px;
-        }
-
-        .hero-circle h1 span {
-          display: block;
-        }
-
-        .hero-circle h1 span:nth-child(3) {
-          font-size: 40px;
-          font-weight: 600;
-        }
-
-        .hero-sub {
-          margin-top: 16px;
-          font-size: 14px;
-          color: #9ca3af;
-        }
-
-        .hero-bottom {
-          margin-top: 40px;
-          display: grid;
-          grid-template-columns: minmax(0, 2fr) minmax(0, 1.3fr);
-          gap: 32px;
-          align-items: center;
-        }
-
-        .hero-mock {
-          border-radius: 24px;
-          background: radial-gradient(circle at top left, #111827, #020617);
-          border: 1px solid rgba(148, 163, 184, 0.4);
-          box-shadow: 0 18px 60px rgba(15, 23, 42, 0.9);
-          overflow: hidden;
-        }
-
-        .hero-mock-top {
-          display: flex;
-          gap: 12px;
-          padding: 14px 18px;
-          border-bottom: 1px solid rgba(31, 41, 55, 0.9);
-          background: rgba(15, 23, 42, 0.95);
-        }
-
-        .hero-mock-tab {
-          padding: 6px 12px;
-          border-radius: 999px;
-          font-size: 12px;
-          color: #9ca3af;
-          background: rgba(15, 23, 42, 0.8);
-        }
-
-        .hero-mock-tab.active {
-          color: #e5f0ff;
-          background: linear-gradient(
-            135deg,
-            rgba(59, 130, 246, 0.9),
-            rgba(56, 189, 248, 0.9)
-          );
-        }
-
-        .hero-mock-body {
-          display: grid;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-          padding: 22px 22px 26px;
-          gap: 18px;
-        }
-
-        .hero-mock-col h3 {
-          font-size: 15px;
-          margin: 0 0 8px;
-        }
-
-        .hero-mock-col p {
-          margin: 0;
-          font-size: 13px;
-          color: #9ca3af;
-        }
-
-        .hero-cta {
-          display: flex;
-          flex-direction: column;
-          gap: 16px;
-        }
-
-        .hero-button-primary {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          padding: 14px 26px;
-          border-radius: 999px;
-          background: linear-gradient(
-            135deg,
-            rgba(59, 130, 246, 1),
-            rgba(56, 189, 248, 1)
-          );
-          color: #0b1120;
-          font-weight: 600;
-          font-size: 16px;
-          text-decoration: none;
-          box-shadow: 0 18px 40px rgba(37, 99, 235, 0.6);
-          transition: transform 0.15s ease, box-shadow 0.15s ease,
-            filter 0.15s ease;
-        }
-
-        .hero-button-primary:hover {
-          transform: translateY(-1px);
-          filter: brightness(1.05);
-          box-shadow: 0 22px 50px rgba(37, 99, 235, 0.8);
-        }
-
-        .hero-cta-note {
-          font-size: 13px;
-          color: #9ca3af;
-          max-width: 360px;
-        }
-
-        .section-steps {
-          max-width: 1120px;
-          margin: 0 auto 40px;
-          padding: 0 16px 40px;
-          display: grid;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-          gap: 20px;
-          border-top: 1px solid rgba(31, 41, 55, 0.9);
-          padding-top: 32px;
-        }
-
-        .step {
-          background: radial-gradient(circle at top, #020617, #020617);
-          border-radius: 20px;
-          border: 1px solid rgba(55, 65, 81, 0.8);
-          padding: 18px 18px 16px;
-        }
-
-        .step-index {
-          font-size: 11px;
-          letter-spacing: 0.16em;
-          text-transform: uppercase;
-          color: #6b7280;
-        }
-
-        .step h3 {
-          margin: 6px 0 6px;
-          font-size: 15px;
-        }
-
-        .step p {
-          margin: 0;
-          font-size: 13px;
-          color: #9ca3af;
-        }
-
-        @media (max-width: 900px) {
-          .hero-circle {
-            padding: 40px 24px 24px;
-          }
-
-          .hero-circle h1 {
-            font-size: 28px;
-          }
-          .hero-circle h1 span:nth-child(3) {
-            font-size: 32px;
-          }
-
-          .hero-bottom {
-            grid-template-columns: minmax(0, 1fr);
-          }
-
-          .hero-mock-body {
-            grid-template-columns: minmax(0, 1fr);
-          }
-
-          .section-steps {
-            grid-template-columns: minmax(0, 1fr);
-          }
-        }
-      `}</style>
+      {/* FOOTER très simple */}
+      <footer
+        style={{
+          padding: "18px 32px 26px",
+          fontSize: "11px",
+          color: "rgba(148,163,184,0.9)",
+          textAlign: "center",
+        }}
+      >
+        © {new Date().getFullYear()} Spectra Media AI — Site pro à 1 € •
+        propulsé par Betty Bots.
+      </footer>
     </main>
   );
 }
