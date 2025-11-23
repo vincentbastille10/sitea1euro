@@ -4,9 +4,9 @@ import { useState } from "react";
 export default function Builder() {
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null);
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e) {
     e.preventDefault();
     setError(null);
     setLoading(true);
@@ -24,7 +24,7 @@ export default function Builder() {
       if (!res.ok) {
         const txt = await res.text();
         console.error("Erreur API generate-site:", res.status, txt);
-        setError("Erreur serveur. (API generate-site)");
+        setError("Erreur serveur (generate-site).");
         return;
       }
 
@@ -35,11 +35,13 @@ export default function Builder() {
       }
 
       setUrl(json.url);
-      // redirection automatique
-      window.location.href = json.url;
+      // redirige vers la page du site créé
+      if (typeof window !== "undefined") {
+        window.location.href = json.url;
+      }
     } catch (err) {
       console.error("Erreur JS dans le builder:", err);
-      setError("Erreur inattendue dans le navigateur.");
+      setError("Erreur inattendue côté navigateur.");
     } finally {
       setLoading(false);
     }
