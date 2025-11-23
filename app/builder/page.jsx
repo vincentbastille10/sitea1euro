@@ -1,30 +1,91 @@
-
 "use client";
 import { useState } from "react";
 
-export default function Builder(){
-  const [url,setUrl]=useState("");
-  const [loading,setLoading]=useState(false);
+export default function Builder() {
+  const [url, setUrl] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  async function submit(e){
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    setError(null);
     setLoading(true);
-    const data=Object.fromEntries(new FormData(e.target).entries());
-    const r=await fetch("/api/generate-site",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)});
-    const j=await r.json();
-    setUrl(j.url||"");
-    setLoading(false);
+
+    try {
+      const formData = new FormData(e.currentTarget);
+      const data = Object.fromEntries(formData.entries());
+
+      const res = await fetch("/api/generate-site", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      if (!res.ok) {
+        const txt = await res.text();
+        console.error("Erreur API generate-site:", res.status, txt);
+        setError("Erreur serveur (generate-site). Regarde les logs Vercel.");
+        return;
+      }
+
+      const json = await res.json();
+      if (!json.url) {
+        setError("Réponse serveur invalide (pas d’URL).");
+        return;
+      }
+
+      setUrl(json.url);
+
+      // redirection automatique vers la page du site
+      window.location.href = json.url;
+    } catch (err) {
+      console.error("Erreur JS dans le builder:", err);
+      setError("Erreur inattendue côté navigateur.");
+    } finally {
+      setLoading(false);
+    }
   }
 
-  return <form onSubmit={submit} style={{display:"flex",flexDirection:"column",gap:10,padding:20}}>
-    <input name="metier" placeholder="metier" required />
-    <input name="nom_enseigne" placeholder="nom enseigne" required />
-    <input name="ville" placeholder="ville" required />
-    <input name="adresse" placeholder="adresse" required />
-    <input name="telephone" placeholder="téléphone" required />
-    <input name="email" type="email" placeholder="email contact" required />
-    <label><input type="checkbox" name="betty_on" defaultChecked /> activer Betty</label>
-    <button>{loading?"Création…":"Créer"}</button>
-    {url && <p>Lien : <a href={url}>{url}</a></p>}
-  </form>
+  return (
+    <div style={{ padding: 20, maxWidth: 600 }}>
+      <h1>Créer mon site pro 1€</h1>
+
+      <form
+        onSubmit={handleSubmit}
+        style={{ display: "flex", flexDirection: "column", gap: 10 }}
+      >
+        <input name="metier" placeholder="Métier (ex : cordonnier)" required />
+        <input name="nom_enseigne" placeholder="Nom de l’enseigne" required />
+        <input name="ville" placeholder="Ville" required />
+        <input name="adresse" placeholder="Adresse complète" required />
+        <input name="telephone" placeholder="Téléphone" required />
+        <input
+          name="email"
+          type="email"
+          placeholder="Email de contact (reçoit les messages)"
+          required
+        />
+        <label>
+          <input type="checkbox" name="betty_on" defaultChecked /> Activer Betty
+        </label>
+
+        <button type="submit" disabled={loading}>
+          {loading ? "Création…" : "Créer mon site"}
+        </button>
+      </form>
+
+      {error && (
+        <p style={{ color: "red", marginTop: 10 }}>
+          {error}
+        </p>
+      )}
+
+      {url && !error && (
+        <p style={{ marginTop: 10 }}>
+          Votre page est disponible ici :{" "}
+          <a href={url}>{url}</a>
+        </p>
+      )}
+    </div>
+  );
 }
