@@ -1,12 +1,41 @@
 // app/page.jsx
 
 export const metadata = {
-  title: "Site pour professionnels à 1 € | Spectra Media AI",
+  title: "Site professionnel à 1 € | Spectra Media AI",
   description:
-    "Une page professionnelle pour votre activité, avec formulaire de contact et assistant Betty en option, pour 1 € par mois.",
+    "Créez votre site professionnel pour 1 € par mois. Page claire, formulaire de contact, visibilité Google, assistant Betty en option. Sans engagement.",
+  keywords: [
+    "site professionnel pas cher",
+    "site internet 1 euro",
+    "création site rapide",
+    "site autoentrepreneur",
+    "site pour artisan",
+    "site vitrine pas cher",
+    "Spectra Media AI",
+    "Betty Bots",
+  ],
+  openGraph: {
+    title: "Créez votre site professionnel pour 1 €",
+    description:
+      "La solution la plus simple pour être visible : un site propre, vos coordonnées, un formulaire de contact, et Betty en option.",
+    url: "https://sitea1euro.vercel.app/",
+    siteName: "Site pro à 1 €",
+    images: [
+      {
+        url: "/spectra_media_logo.png",
+        width: 1200,
+        height: 630,
+        alt: "Site professionnel 1 euro",
+      },
+    ],
+    locale: "fr_FR",
+    type: "website",
+  },
 };
 
 export default function Home() {
+  const year = new Date().getFullYear();
+
   return (
     <main
       style={{
@@ -74,7 +103,7 @@ export default function Home() {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          padding: "40px 16px 72px",
+          padding: "40px 16px 30px",
         }}
       >
         {/* Cercle / halo */}
@@ -125,8 +154,8 @@ export default function Home() {
           >
             Abonnement mensuel, résiliable à tout moment.
             <br />
-            Votre page claire, vos coordonnées, un formulaire de contact
-            <span style={{ opacity: 0.9 }}> – assistant Betty en option.</span>
+            Une page claire, vos coordonnées, un formulaire de contact
+            <span style={{ opacity: 0.9 }}> – Betty en option.</span>
           </p>
 
           {/* CTA principal */}
@@ -168,7 +197,7 @@ export default function Home() {
         {/* Bandeau / Tabs */}
         <div
           style={{
-            marginTop: "60px",
+            marginTop: "50px",
             width: "min(1040px, 100%)",
             borderRadius: "26px",
             background: "rgba(15,23,42,0.9)",
@@ -177,7 +206,7 @@ export default function Home() {
             overflow: "hidden",
           }}
         >
-          {/* Onglets (statique pour l’instant) */}
+          {/* Onglets (statique visuel) */}
           <div
             style={{
               display: "flex",
@@ -323,10 +352,10 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Mini rappel CTA */}
+        {/* MINI RAPPEL CTA */}
         <div
           style={{
-            marginTop: "30px",
+            marginTop: "26px",
             textAlign: "center",
             fontSize: "13px",
             color: "rgba(148,163,184,0.9)",
@@ -347,9 +376,119 @@ export default function Home() {
           </a>
           .
         </div>
+
+        {/* SECTION AVIS */}
+        <section
+          style={{
+            width: "100%",
+            maxWidth: "1020px",
+            margin: "70px auto 40px",
+            padding: "0 20px",
+          }}
+        >
+          <h2
+            style={{
+              textAlign: "center",
+              fontSize: "24px",
+              fontWeight: 600,
+              marginBottom: "26px",
+              color: "#f3f4f6",
+              textShadow: "0 0 20px rgba(59,130,246,0.45)",
+            }}
+          >
+            Ils utilisent déjà leur site à 1&nbsp;€
+          </h2>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+              gap: "22px",
+            }}
+          >
+            {/* Avis 1 */}
+            <div
+              style={{
+                background: "rgba(15,23,42,0.85)",
+                border: "1px solid rgba(30,64,175,0.4)",
+                padding: "22px",
+                borderRadius: "20px",
+                boxShadow: "0 0 18px rgba(59,130,246,0.2)",
+              }}
+            >
+              <p style={{ fontSize: "15px", lineHeight: 1.6, opacity: 0.9 }}>
+                “J’avais besoin d’une page simple pour mon activité de
+                réflexologue. En dix minutes tout était prêt. J’ai reçu trois
+                demandes la première semaine. Le prix est ridicule pour ce que
+                ça apporte.”
+              </p>
+              <p style={{ marginTop: "14px", fontWeight: 600 }}>— Sandra L.</p>
+            </div>
+
+            {/* Avis 2 */}
+            <div
+              style={{
+                background: "rgba(15,23,42,0.85)",
+                border: "1px solid rgba(30,64,175,0.4)",
+                padding: "22px",
+                borderRadius: "20px",
+                boxShadow: "0 0 18px rgba(56,189,248,0.2)",
+              }}
+            >
+              <p style={{ fontSize: "15px", lineHeight: 1.6, opacity: 0.9 }}>
+                “Je ne voulais pas de site compliqué. Là j’ai juste une page
+                claire, mon numéro, et les messages arrivent dans ma boîte
+                Gmail. C’est parfait pour un auto-entrepreneur.”
+              </p>
+              <p style={{ marginTop: "14px", fontWeight: 600 }}>— Karim B.</p>
+            </div>
+
+            {/* Avis 3 */}
+            <div
+              style={{
+                background: "rgba(15,23,42,0.85)",
+                border: "1px solid rgba(30,64,175,0.4)",
+                padding: "22px",
+                borderRadius: "20px",
+                boxShadow: "0 0 18px rgba(37,99,235,0.25)",
+              }}
+            >
+              <p style={{ fontSize: "15px", lineHeight: 1.6, opacity: 0.9 }}>
+                “Je suis artisan menuisier. Le site me sert de carte de visite
+                professionnelle. J’ai ajouté Betty et elle répond aux demandes
+                pendant que je suis sur les chantiers.”
+              </p>
+              <p style={{ marginTop: "14px", fontWeight: 600 }}>— Julien P.</p>
+            </div>
+          </div>
+        </section>
       </section>
 
-      {/* FOOTER très simple */}
+      {/* JSON-LD pour Google */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Service",
+            name: "Site professionnel à 1 €",
+            provider: {
+              "@type": "Organization",
+              name: "Spectra Media AI",
+              url: "https://spectramedia.online",
+            },
+            description:
+              "Création d’un site professionnel simple, rapide, optimisé pour Google, à 1 € par mois.",
+            offers: {
+              "@type": "Offer",
+              price: "1.00",
+              priceCurrency: "EUR",
+            },
+          }),
+        }}
+      ></script>
+
+      {/* FOOTER */}
       <footer
         style={{
           padding: "18px 32px 26px",
@@ -358,8 +497,21 @@ export default function Home() {
           textAlign: "center",
         }}
       >
-        © {new Date().getFullYear()} Spectra Media AI — Site pro à 1 € •
-        propulsé par Betty Bots.
+        <div>
+          © {year} Spectra Media AI — Site pro à 1 € • propulsé par Betty Bots.
+        </div>
+        <div style={{ marginTop: "10px" }}>
+          <a
+            href="mailto:spectramediabots@gmail.com"
+            style={{
+              color: "#60a5fa",
+              textDecoration: "none",
+              fontSize: "12px",
+            }}
+          >
+            Contact Spectra Media : spectramediabots@gmail.com
+          </a>
+        </div>
       </footer>
     </main>
   );
