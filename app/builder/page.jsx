@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { METIERS } from "../../lib/metiers";
 
 export default function Builder() {
   const [url, setUrl] = useState("");
@@ -35,7 +36,6 @@ export default function Builder() {
       }
 
       setUrl(json.url);
-      // redirige vers la page du site créé
       if (typeof window !== "undefined") {
         window.location.href = json.url;
       }
@@ -55,7 +55,21 @@ export default function Builder() {
         onSubmit={handleSubmit}
         style={{ display: "flex", flexDirection: "column", gap: 10 }}
       >
-        <input name="metier" placeholder="Métier (ex : cordonnier)" required />
+        {/* Sélecteur de métier */}
+        <label>
+          Métier
+          <select name="metier" defaultValue="" required>
+            <option value="" disabled>
+              Choisissez votre métier
+            </option>
+            {METIERS.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.label}
+              </option>
+            ))}
+          </select>
+        </label>
+
         <input name="nom_enseigne" placeholder="Nom de l’enseigne" required />
         <input name="ville" placeholder="Ville" required />
         <input name="adresse" placeholder="Adresse complète" required />
@@ -66,8 +80,23 @@ export default function Builder() {
           placeholder="Email de contact (reçoit les messages)"
           required
         />
+
+        {/* Choix du plan : 1€ seul ou 29,99€ + 1€ */}
+        <fieldset style={{ border: "1px solid #ddd", borderRadius: 8, padding: 10 }}>
+          <legend>Formule</legend>
+          <label style={{ display: "block", marginBottom: 6 }}>
+            <input type="radio" name="plan" value="site" defaultChecked />{" "}
+            Site simple – 1€ / mois
+          </label>
+          <label style={{ display: "block" }}>
+            <input type="radio" name="plan" value="site+betty" />{" "}
+            Site + Betty métier – 29,99€ + 1€ / mois
+          </label>
+        </fieldset>
+
         <label>
           <input type="checkbox" name="betty_on" defaultChecked /> Activer Betty
+          sur la page (si formule site + Betty)
         </label>
 
         <button type="submit" disabled={loading}>
@@ -83,8 +112,7 @@ export default function Builder() {
 
       {url && !error && (
         <p style={{ marginTop: 10 }}>
-          Votre page est disponible ici :{" "}
-          <a href={url}>{url}</a>
+          Votre page est disponible ici : <a href={url}>{url}</a>
         </p>
       )}
     </div>
