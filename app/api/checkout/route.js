@@ -30,6 +30,7 @@ export async function POST(req) {
     telephone,
     email,
     plan,
+    betty_public_id, // <-- nouveau champ optionnel
   } = b || {};
 
   if (!metier || !nom_enseigne || !ville || !adresse || !telephone || !email) {
@@ -51,6 +52,10 @@ export async function POST(req) {
   // Betty activée automatiquement si le plan est "site+betty"
   const betty_on = chosenPlan === "site+betty";
 
+  // Si le front n’envoie rien, on force la Betty neutre par défaut
+  const safeBettyId =
+    (betty_public_id && betty_public_id.trim()) || "betty_neutre_001";
+
   const metadata = {
     metier,
     nom_enseigne,
@@ -60,6 +65,7 @@ export async function POST(req) {
     email,
     plan: chosenPlan,
     betty_on: betty_on ? "1" : "0",
+    betty_public_id: safeBettyId, // <-- envoyé à Stripe pour le webhook
   };
 
   try {
