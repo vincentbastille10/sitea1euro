@@ -39,13 +39,17 @@ export async function POST(req) {
     );
   }
 
-  const priceId = plan === "site+betty" ? priceSiteBetty : priceSite;
+  const chosenPlan = plan || "site";
+  const priceId = chosenPlan === "site+betty" ? priceSiteBetty : priceSite;
   if (!priceId) {
     return NextResponse.json(
       { error: "Prix Stripe manquant pour ce plan" },
       { status: 500 }
     );
   }
+
+  // Betty activée automatiquement si le plan est "site+betty"
+  const betty_on = chosenPlan === "site+betty";
 
   const metadata = {
     metier,
@@ -54,7 +58,8 @@ export async function POST(req) {
     adresse,
     telephone,
     email,
-    plan: plan || "site",
+    plan: chosenPlan,
+    betty_on: betty_on ? "1" : "0",
   };
 
   try {
