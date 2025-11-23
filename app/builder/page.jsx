@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 
+// Liste visible dans le select
 const METIERS_PREDEFINIS = [
   "Coiffeuse / salon de coiffure",
   "Ostéopathe",
+  "Ostéopathe animalier",
   "Thérapeute / psychopraticien",
   "Esthéticienne",
   "Coach sportif",
@@ -13,6 +15,21 @@ const METIERS_PREDEFINIS = [
   "Restaurant / café",
   "Agent immobilier",
 ];
+
+// Si un jour tu veux pointer vers des packs métier précis,
+// tu pourras remplir ce mapping.
+// Pour l’instant, TOUT renvoie betty_neutre_001 => safe.
+const METIER_TO_BETTY_ID = {
+  // "Coiffeuse / salon de coiffure": "betty_coiffeuse_001",
+  // "Ostéopathe": "betty_osteopathe_001",
+  // ...
+};
+
+function getBettyPublicId(metier) {
+  if (!metier) return "betty_neutre_001";
+  const id = METIER_TO_BETTY_ID[metier];
+  return id || "betty_neutre_001";
+}
 
 export default function Builder() {
   const [loading, setLoading] = useState(false);
@@ -29,21 +46,38 @@ export default function Builder() {
       const formData = new FormData(e.currentTarget);
       const data = Object.fromEntries(formData.entries());
 
-      // Si "Autre métier" est choisi, on remplace metier par le champ libre
+      // Gestion "Autre métier"
+      let metierFinal = data.metier;
       if (data.metier === "autre" && data.metier_custom) {
-        data.metier = data.metier_custom.trim();
+        metierFinal = data.metier_custom.trim();
       }
 
-      if (!data.metier) {
+      if (!metierFinal) {
         setError("Merci d’indiquer votre métier.");
         setLoading(false);
         return;
       }
 
+      data.metier = metierFinal;
+
+      // Calcul du betty_public_id côté front
+      const betty_public_id = getBettyPublicId(metierFinal);
+
+      const payload = {
+        metier: data.metier,
+        nom_enseigne: data.nom_enseigne,
+        ville: data.ville,
+        adresse: data.adresse,
+        telephone: data.telephone,
+        email: data.email,
+        plan: data.plan || "site",
+        betty_public_id, // envoyé à /api/checkout → Stripe metadata
+      };
+
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify(payload),
       });
 
       if (!res.ok) {
@@ -74,7 +108,7 @@ export default function Builder() {
     <div
       style={{
         minHeight: "100vh",
-        background: "radial-gradient(circle at top, #111827, #020617)",
+        background: "radial-gradient(circle at top, #020617, #020617 40%, #020617)",
         color: "white",
         display: "flex",
         justifyContent: "center",
@@ -85,12 +119,12 @@ export default function Builder() {
       <div
         style={{
           width: "100%",
-          maxWidth: 720,
+          maxWidth: 760,
           borderRadius: 24,
           background:
-            "linear-gradient(145deg, rgba(15,23,42,0.9), rgba(15,23,42,0.98))",
-          boxShadow: "0 24px 60px rgba(0,0,0,0.6)",
-          border: "1px solid rgba(148,163,184,0.25)",
+            "linear-gradient(145deg, rgba(15,23,42,0.96), rgba(15,23,42,0.99))",
+          boxShadow: "0 24px 70px rgba(0,0,0,0.7)",
+          border: "1px solid rgba(148,163,184,0.35)",
           padding: 24,
         }}
       >
@@ -138,7 +172,7 @@ export default function Builder() {
               fontWeight: 700,
             }}
           >
-            Configurez votre site pro à 1€
+            Configurez votre mini-site professionnel
           </h1>
           <p
             style={{
@@ -148,12 +182,13 @@ export default function Builder() {
               maxWidth: 520,
             }}
           >
-            Quelques infos, un paiement sécurisé, et nous générons
-            automatiquement votre mini-site professionnel, prêt à accueillir
-            votre future Betty.
+            Un site vitrine simple, votre métier clairement mis en avant,
+            et la possibilité d’ajouter Betty, votre assistante IA, qui
+            répond à vos visiteurs 24/7.
           </p>
         </div>
 
+        {/* Form */}
         <form
           onSubmit={handleSubmit}
           style={{
@@ -224,7 +259,8 @@ export default function Builder() {
             </div>
             <p style={{ fontSize: 12, color: "#9ca3af", marginTop: 6 }}>
               Si votre métier n’apparaît pas, choisissez “Autre métier” et
-              décrivez-le : une Betty neutre lui sera associée.
+              décrivez-le : une Betty neutre{" "}
+              <strong>(betty_neutre_001)</strong> lui sera associée.
             </p>
           </div>
 
@@ -302,7 +338,7 @@ export default function Builder() {
             </label>
             <input
               name="telephone"
-              placeholder="06..."
+              placeholder="06…"
               required
               style={inputStyle}
             />
