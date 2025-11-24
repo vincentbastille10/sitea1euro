@@ -17,164 +17,320 @@ export const metadata = {
   ],
 };
 
-// --- PAGE CONTENT ---
 import Image from "next/image";
 import Link from "next/link";
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-50">
-      {/* HERO */}
-      <section className="px-4 py-16 md:py-24 max-w-5xl mx-auto">
-        <div className="flex flex-col items-center text-center gap-8">
-          {/* Logo Spectra Media au centre */}
-          <div className="relative w-40 h-40 md:w-52 md:h-52">
+    <>
+      <main className="page">
+        {/* HERO */}
+        <section className="hero">
+          <div className="hero-logo">
             <Image
               src="/spectra_media_logo.png"
               alt="Spectra Media"
               fill
-              sizes="(max-width: 768px) 160px, 208px"
-              className="object-contain drop-shadow-xl"
-              priority
+              sizes="200px"
             />
           </div>
 
-          <div className="space-y-4 max-w-2xl">
-            <p className="text-xs uppercase tracking-[0.2em] text-sky-400/80">
-              Offre transparente Spectra Media
-            </p>
+          <p className="hero-tagline">Offre transparente Spectra Media</p>
 
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-semibold leading-tight">
-              Votre site professionnel à{" "}
-              <span className="text-sky-400">1&nbsp;€ par mois</span>
-            </h1>
+          <h1 className="hero-title">
+            Votre site professionnel à <span>1&nbsp;€ par mois</span>
+          </h1>
 
-            <p className="text-slate-300 text-sm md:text-base">
-              Vous répondez à quelques questions. On crée votre site, on génère
-              l’image de fond, et vous recevez automatiquement par mail l’URL de
-              votre nouvelle vitrine en ligne.
-            </p>
-          </div>
+          <p className="hero-text">
+            Vous répondez à quelques questions. On crée votre site, on génère
+            l’image de fond, et vous recevez automatiquement par mail l’URL de
+            votre nouvelle vitrine en ligne.
+          </p>
 
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-center">
-            <Link
-              href="/builder"
-              className="inline-flex items-center justify-center rounded-full px-8 py-3 text-sm font-semibold bg-sky-500 hover:bg-sky-400 text-slate-950 shadow-lg shadow-sky-500/30 transition"
-            >
+          <div className="hero-actions">
+            <Link href="/builder" className="primaryButton">
               Créer mon site à 1&nbsp;€
             </Link>
-            <p className="text-xs text-slate-400">
+            <p className="hero-note">
               Sans engagement • Paiement mensuel via Stripe • Annulable à tout
               moment
             </p>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* SECTION : POUR QUI ? */}
-      <section className="px-4 py-10 md:py-14 border-t border-slate-800/80 bg-slate-950/80">
-        <div className="max-w-5xl mx-auto grid gap-10 md:grid-cols-[1.2fr,1fr] items-center">
-          <div className="space-y-4">
-            <h2 className="text-xl md:text-2xl font-semibold">
-              Pensé pour les pros qui n'ont pas le temps
-            </h2>
-
-            <p className="text-sm md:text-base text-slate-300">
+        {/* POUR QUI */}
+        <section className="section section-split">
+          <div className="section-text">
+            <h2>Pensé pour les pros qui n&apos;ont pas le temps</h2>
+            <p>
               Coiffeurs, thérapeutes, ostéopathes, artisans, coachs,
-              restaurateurs… Vous avez besoin d'une page claire, jolie et
-              facile à partager, pas d'un chantier technique sans fin.
+              restaurateurs… Vous avez besoin d&apos;une page claire, jolie et
+              facile à partager, pas d&apos;un chantier technique sans fin.
             </p>
-
-            <p className="text-sm text-slate-400">
-              Votre site à 1&nbsp;€ s'affiche parfaitement sur mobile et peut
-              intégrer en option votre assistante IA Betty pour capter les
+            <p>
+              Votre site à 1&nbsp;€ s&apos;affiche parfaitement sur mobile et
+              peut intégrer en option votre assistante IA Betty pour capter les
               demandes 24/7.
             </p>
           </div>
 
-          <div className="rounded-2xl border border-sky-500/40 bg-slate-900/60 p-4 md:p-5 shadow-xl shadow-sky-900/40">
-            <p className="text-xs font-semibold text-sky-400 mb-2">
-              En 3 étapes :
-            </p>
-
-            <ol className="space-y-3 text-sm text-slate-200">
+          <div className="card-steps">
+            <p className="card-title">En 3 étapes :</p>
+            <ol>
               <li>
-                <span className="font-semibold text-sky-400">1.</span> Vous
-                remplissez un court formulaire (métier, ville, coordonnées).
+                Vous remplissez un court formulaire (métier, ville,
+                coordonnées).
               </li>
-
               <li>
-                <span className="font-semibold text-sky-400">2.</span> Vous
-                validez l'abonnement sécurisé à 1&nbsp;€ / mois via Stripe.
+                Vous validez l&apos;abonnement sécurisé à 1&nbsp;€ / mois via
+                Stripe.
               </li>
-
               <li>
-                <span className="font-semibold text-sky-400">3.</span> Vous
-                recevez par mail l'URL de votre site et vous pouvez la partager
-                immédiatement.
+                Vous recevez par mail l&apos;URL de votre site et vous pouvez la
+                partager immédiatement.
               </li>
             </ol>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* SECTION AVANTAGES */}
-      <section className="px-4 py-12 md:py-16">
-        <div className="max-w-5xl mx-auto space-y-8">
-          <h2 className="text-xl md:text-2xl font-semibold text-center">
+        {/* AVANTAGES */}
+        <section className="section">
+          <h2 className="section-title">
             Ce que votre site à 1&nbsp;€ fait pour vous
           </h2>
 
-          <div className="grid gap-6 md:grid-cols-3 text-sm">
-            <div className="rounded-2xl bg-slate-900/70 border border-slate-800 p-5">
-              <p className="text-sky-400 text-xs font-semibold mb-2">
-                Vitrine claire
-              </p>
-              <p className="text-slate-200">
+          <div className="cards-grid">
+            <div className="card">
+              <p className="card-label">Vitrine claire</p>
+              <p>
                 Une page propre avec vos services, vos coordonnées, un plan et
                 un bouton de contact immédiat.
               </p>
             </div>
-
-            <div className="rounded-2xl bg-slate-900/70 border border-slate-800 p-5">
-              <p className="text-sky-400 text-xs font-semibold mb-2">
-                Image générée automatiquement
-              </p>
-              <p className="text-slate-200">
+            <div className="card">
+              <p className="card-label">Image générée automatiquement</p>
+              <p>
                 Une image de fond générée par IA à partir de votre métier, de
                 votre ville et de votre identité de pro.
               </p>
             </div>
-
-            <div className="rounded-2xl bg-slate-900/70 border border-slate-800 p-5">
-              <p className="text-sky-400 text-xs font-semibold mb-2">
-                Option Betty
-              </p>
-              <p className="text-slate-200">
+            <div className="card">
+              <p className="card-label">Option Betty</p>
+              <p>
                 En ajoutant 1&nbsp;€ de plus, vous pouvez activer Betty, votre
                 assistante IA qui accueille vos visiteurs.
               </p>
             </div>
           </div>
 
-          <div className="flex justify-center">
-            <Link
-              href="/builder"
-              className="inline-flex items-center justify-center rounded-full px-8 py-3 text-sm font-semibold bg-sky-500 hover:bg-sky-400 text-slate-950 shadow-lg shadow-sky-500/30 transition"
-            >
+          <div className="section-cta">
+            <Link href="/builder" className="primaryButton">
               Lancer la création de mon site
             </Link>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* FOOTER */}
-      <footer className="border-t border-slate-800/80 py-6 text-center text-xs text-slate-500">
-        <p>
+        {/* FOOTER */}
+        <footer className="footer">
           Spectra Media • Sites pour professionnels à 1&nbsp;€ par mois •
           Annulable à tout moment.
-        </p>
-      </footer>
-    </main>
+        </footer>
+      </main>
+
+      {/* STYLES SPÉCIFIQUES À LA PAGE */}
+      <style jsx>{`
+        .page {
+          background: #ffffff;
+          color: #111111;
+        }
+
+        .hero,
+        .section {
+          max-width: 960px;
+          margin: 0 auto;
+          padding: 40px 16px;
+        }
+
+        .hero {
+          text-align: center;
+        }
+
+        .hero-logo {
+          position: relative;
+          width: 180px;
+          height: 180px;
+          margin: 0 auto 16px auto;
+        }
+
+        .hero-tagline {
+          font-size: 12px;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          color: #4b5563;
+          margin-bottom: 8px;
+        }
+
+        .hero-title {
+          font-size: 32px;
+          line-height: 1.2;
+          margin: 0 0 12px 0;
+        }
+
+        .hero-title span {
+          color: #2563eb; /* bleu accent propre */
+          font-weight: 700;
+        }
+
+        .hero-text {
+          max-width: 640px;
+          margin: 0 auto;
+          font-size: 15px;
+          color: #374151;
+        }
+
+        .hero-actions {
+          margin-top: 24px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .primaryButton {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          padding: 12px 32px;
+          border-radius: 999px;
+          background-color: #2563eb;
+          color: #ffffff;
+          font-size: 14px;
+          font-weight: 600;
+          text-decoration: none;
+          border: none;
+          cursor: pointer;
+          transition: background-color 0.15s ease, transform 0.1s ease;
+        }
+
+        .primaryButton:hover {
+          background-color: #1d4ed8;
+          transform: translateY(-1px);
+        }
+
+        .hero-note {
+          font-size: 12px;
+          color: #6b7280;
+        }
+
+        .section-split {
+          display: flex;
+          flex-direction: column;
+          gap: 24px;
+          border-top: 1px solid #e5e7eb;
+        }
+
+        .section-text h2 {
+          font-size: 22px;
+          margin-bottom: 12px;
+        }
+
+        .section-text p {
+          font-size: 15px;
+          color: #374151;
+          margin-bottom: 8px;
+        }
+
+        .card-steps {
+          border-radius: 16px;
+          border: 1px solid #bfdbfe;
+          background: #eff6ff;
+          padding: 16px 20px;
+          font-size: 14px;
+          color: #1f2933;
+        }
+
+        .card-title {
+          font-weight: 600;
+          color: #1d4ed8;
+          margin-bottom: 8px;
+          font-size: 13px;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+        }
+
+        .card-steps ol {
+          padding-left: 18px;
+          margin: 0;
+        }
+
+        .card-steps li {
+          margin-bottom: 6px;
+        }
+
+        .section-title {
+          text-align: center;
+          font-size: 22px;
+          margin-bottom: 24px;
+        }
+
+        .cards-grid {
+          display: grid;
+          grid-template-columns: repeat(1, minmax(0, 1fr));
+          gap: 16px;
+        }
+
+        .card {
+          border-radius: 16px;
+          border: 1px solid #e5e7eb;
+          background: #f9fafb;
+          padding: 16px 20px;
+          font-size: 14px;
+          color: #111827;
+        }
+
+        .card-label {
+          font-size: 12px;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          color: #2563eb;
+          margin-bottom: 6px;
+        }
+
+        .section-cta {
+          margin-top: 24px;
+          text-align: center;
+        }
+
+        .footer {
+          border-top: 1px solid #e5e7eb;
+          padding: 16px;
+          text-align: center;
+          font-size: 12px;
+          color: #6b7280;
+          margin-top: 16px;
+        }
+
+        @media (min-width: 768px) {
+          .hero-title {
+            font-size: 40px;
+          }
+
+          .section-split {
+            flex-direction: row;
+            align-items: flex-start;
+          }
+
+          .section-text,
+          .card-steps {
+            flex: 1;
+          }
+
+          .cards-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+          }
+        }
+      `}</style>
+    </>
   );
 }
