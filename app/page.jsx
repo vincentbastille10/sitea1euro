@@ -16,122 +16,85 @@ export const metadata = {
   ],
 };
 
-import Image from "next/image";
-import Link from "next/link";
-
 export default function Home() {
   return (
-    <main className="sm-page">
-      {/* HERO */}
-      <section className="sm-hero">
-        <div className="sm-hero-logo">
-          <Image
+    <main style={{ fontFamily: "system-ui", padding: "40px 16px" }}>
+      <section style={{ maxWidth: 960, margin: "0 auto", textAlign: "center" }}>
+        <div style={{ marginBottom: 16 }}>
+          <img
             src="/spectra_media_logo.png"
             alt="Spectra Media"
-            fill
-            sizes="200px"
+            style={{ maxWidth: 200, height: "auto", display: "block", margin: "0 auto" }}
           />
         </div>
 
-        <p className="sm-hero-tagline">Offre transparente Spectra Media</p>
-
-        <h1 className="sm-hero-title">
-          Votre site professionnel à <span>1&nbsp;€ par mois</span>
-        </h1>
-
-        <p className="sm-hero-text">
-          Vous répondez à quelques questions. On crée votre site, on génère
-          l’image de fond, et vous recevez automatiquement par mail l’URL de
-          votre nouvelle vitrine en ligne.
+        <p
+          style={{
+            fontSize: 12,
+            letterSpacing: "0.16em",
+            textTransform: "uppercase",
+            color: "#4b5563",
+            marginBottom: 8,
+          }}
+        >
+          Offre transparente Spectra Media
         </p>
 
-        <div className="sm-hero-actions">
-          <Link href="/builder" className="sm-btn-primary">
+        <h1
+          style={{
+            fontSize: 32,
+            lineHeight: 1.2,
+            margin: "0 0 12px 0",
+          }}
+        >
+          Votre site professionnel à{" "}
+          <span style={{ color: "#2563eb", fontWeight: 700 }}>1&nbsp;€ par mois</span>
+        </h1>
+
+        <p
+          style={{
+            maxWidth: 640,
+            margin: "0 auto",
+            fontSize: 15,
+            color: "#374151",
+          }}
+        >
+          Vous répondez à quelques questions. On crée votre site, on génère l’image de fond,
+          et vous recevez automatiquement par mail l’URL de votre nouvelle vitrine en ligne.
+        </p>
+
+        <div style={{ marginTop: 24 }}>
+          <a
+            href="/builder"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "12px 32px",
+              borderRadius: 999,
+              backgroundColor: "#2563eb",
+              color: "#ffffff",
+              fontSize: 14,
+              fontWeight: 600,
+              textDecoration: "none",
+              border: "none",
+              cursor: "pointer",
+            }}
+          >
             Créer mon site à 1&nbsp;€
-          </Link>
-          <p className="sm-hero-note">
-            Sans engagement • Paiement mensuel via Stripe • Annulable à tout
-            moment
+          </a>
+
+          <p
+            style={{
+              fontSize: 12,
+              color: "#6b7280",
+              marginTop: 8,
+            }}
+          >
+            Sans engagement • Paiement mensuel via Stripe • Annulable à tout moment
           </p>
         </div>
       </section>
-
-      {/* POUR QUI */}
-      <section className="sm-section sm-section-split">
-        <div className="sm-section-text">
-          <h2>Pensé pour les pros qui n&apos;ont pas le temps</h2>
-          <p>
-            Coiffeurs, thérapeutes, ostéopathes, artisans, coachs, restaurateurs…
-            Vous avez besoin d&apos;une page claire, jolie et facile à partager,
-            pas d&apos;un chantier technique sans fin.
-          </p>
-          <p>
-            Votre site à 1&nbsp;€ s&apos;affiche parfaitement sur mobile et peut
-            intégrer en option votre assistante IA Betty pour capter les demandes
-            24/7.
-          </p>
-        </div>
-
-        <div className="sm-card-steps">
-          <p className="sm-card-title">En 3 étapes :</p>
-          <ol>
-            <li>
-              Vous remplissez un court formulaire (métier, ville, coordonnées).
-            </li>
-            <li>
-              Vous validez l&apos;abonnement sécurisé à 1&nbsp;€ / mois via
-              Stripe.
-            </li>
-            <li>
-              Vous recevez par mail l&apos;URL de votre site et vous pouvez la
-              partager immédiatement.
-            </li>
-          </ol>
-        </div>
-      </section>
-
-      {/* AVANTAGES */}
-      <section className="sm-section">
-        <h2 className="sm-section-title">
-          Ce que votre site à 1&nbsp;€ fait pour vous
-        </h2>
-
-        <div className="sm-cards-grid">
-          <div className="sm-card">
-            <p className="sm-card-label">Vitrine claire</p>
-            <p>
-              Une page propre avec vos services, vos coordonnées, un plan et un
-              bouton de contact immédiat.
-            </p>
-          </div>
-          <div className="sm-card">
-            <p className="sm-card-label">Image générée automatiquement</p>
-            <p>
-              Une image de fond générée par IA à partir de votre métier, de
-              votre ville et de votre identité de pro.
-            </p>
-          </div>
-          <div className="sm-card">
-            <p className="sm-card-label">Option Betty</p>
-            <p>
-              En ajoutant 1&nbsp;€ de plus, vous pouvez activer Betty, votre
-              assistante IA qui accueille vos visiteurs.
-            </p>
-          </div>
-        </div>
-
-        <div className="sm-section-cta">
-          <Link href="/builder" className="sm-btn-primary">
-            Lancer la création de mon site
-          </Link>
-        </div>
-      </section>
-
-      {/* FOOTER */}
-      <footer className="sm-footer">
-        Spectra Media • Sites pour professionnels à 1&nbsp;€ par mois •
-        Annulable à tout moment.
-      </footer>
     </main>
   );
 }
