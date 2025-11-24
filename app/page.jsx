@@ -19,12 +19,18 @@ export const metadata = {
 export default function Home() {
   return (
     <main style={{ fontFamily: "system-ui", padding: "40px 16px" }}>
+      {/* HERO */}
       <section style={{ maxWidth: 960, margin: "0 auto", textAlign: "center" }}>
         <div style={{ marginBottom: 16 }}>
           <img
             src="/spectra_media_logo.png"
             alt="Spectra Media"
-            style={{ maxWidth: 200, height: "auto", display: "block", margin: "0 auto" }}
+            style={{
+              maxWidth: 200,
+              height: "auto",
+              display: "block",
+              margin: "0 auto",
+            }}
           />
         </div>
 
@@ -48,7 +54,9 @@ export default function Home() {
           }}
         >
           Votre site professionnel à{" "}
-          <span style={{ color: "#2563eb", fontWeight: 700 }}>1&nbsp;€ par mois</span>
+          <span style={{ color: "#2563eb", fontWeight: 700 }}>
+            1&nbsp;€ par mois
+          </span>
         </h1>
 
         <p
@@ -59,8 +67,9 @@ export default function Home() {
             color: "#374151",
           }}
         >
-          Vous répondez à quelques questions. On crée votre site, on génère l’image de fond,
-          et vous recevez automatiquement par mail l’URL de votre nouvelle vitrine en ligne.
+          Vous répondez à quelques questions. On crée votre site, on génère
+          l’image de fond, et vous recevez automatiquement par mail l’URL de
+          votre nouvelle vitrine en ligne.
         </p>
 
         <div style={{ marginTop: 24 }}>
@@ -91,8 +100,145 @@ export default function Home() {
               marginTop: 8,
             }}
           >
-            Sans engagement • Paiement mensuel via Stripe • Annulable à tout moment
+            Sans engagement • Paiement mensuel via Stripe • Annulable à tout
+            moment
           </p>
+        </div>
+      </section>
+
+      {/* EXEMPLES DE SITES */}
+      <section
+        style={{
+          maxWidth: 960,
+          margin: "40px auto 0",
+          textAlign: "center",
+        }}
+      >
+        <h2
+          style={{
+            fontSize: 20,
+            marginBottom: 16,
+          }}
+        >
+          Exemples de sites générés avec l&apos;offre à 1&nbsp;€
+        </h2>
+
+        <p
+          style={{
+            fontSize: 14,
+            color: "#4b5563",
+            marginBottom: 24,
+          }}
+        >
+          Chaque site est adapté au métier et à la ville de votre activité.
+        </p>
+
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 16,
+            justifyContent: "center",
+          }}
+        >
+          {/* Esthéticienne */}
+          <div
+            style={{
+              flex: "1 1 260px",
+              maxWidth: 300,
+              borderRadius: 16,
+              border: "1px solid #e5e7eb",
+              padding: 12,
+              boxSizing: "border-box",
+            }}
+          >
+            <img
+              src="/site1euroeste.png"
+              alt="Exemple site esthéticienne"
+              style={{
+                width: "100%",
+                height: 260,
+                objectFit: "cover",
+                borderRadius: 12,
+                display: "block",
+              }}
+            />
+            <p
+              style={{
+                marginTop: 8,
+                fontSize: 13,
+                fontWeight: 600,
+              }}
+            >
+              Esthéticienne
+            </p>
+          </div>
+
+          {/* Agent immobilier */}
+          <div
+            style={{
+              flex: "1 1 260px",
+              maxWidth: 300,
+              borderRadius: 16,
+              border: "1px solid #e5e7eb",
+              padding: 12,
+              boxSizing: "border-box",
+            }}
+          >
+            <img
+              src="/site1euroimmo.png"
+              alt="Exemple site agent immobilier"
+              style={{
+                width: "100%",
+                height: 260,
+                objectFit: "cover",
+                borderRadius: 12,
+                display: "block",
+              }}
+            />
+            <p
+              style={{
+                marginTop: 8,
+                fontSize: 13,
+                fontWeight: 600,
+              }}
+            >
+              Agent immobilier
+            </p>
+          </div>
+
+          {/* Artisan */}
+          <div
+            style={{
+              flex: "1 1 260px",
+              maxWidth: 300,
+              borderRadius: 16,
+              border: "1px solid #e5e7eb",
+              padding: 12,
+              boxSizing: "border-box",
+            }}
+          >
+            <img
+              src="/site1euroarti.png"
+              alt="Exemple site artisan"
+              style={{
+                width: "100%",
+                height: 260,
+                objectFit: "cover",
+                borderRadius: 12,
+                display: "block",
+              }}
+            />
+            <p
+              style={{
+                marginTop: 8,
+                fontSize: 13,
+                fontWeight: 600,
+              }}
+            >
+              Artisan
+            </p>
+          </div>
         </div>
       </section>
     </main>
