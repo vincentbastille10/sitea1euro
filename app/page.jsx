@@ -1,4 +1,5 @@
 // app/page.jsx
+"use client";
 
 // --- SEO / METADATA ---
 export const metadata = {
