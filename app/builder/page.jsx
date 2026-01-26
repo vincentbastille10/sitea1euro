@@ -413,7 +413,7 @@ export default function Builder() {
                   value="site+betty"
                   style={{ marginRight: 6 }}
                 />
-                Site + Betty métier – 29,99€ + 1€ / mois
+                Site + Betty métier – 129€ + 1€ / mois
               </label>
             </fieldset>
           </div>
