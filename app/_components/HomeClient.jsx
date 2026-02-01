@@ -1,7 +1,7 @@
 // app/_components/HomeClient.jsx
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 function useReducedMotion() {
   const [reduced, setReduced] = useState(false);
@@ -15,34 +15,13 @@ function useReducedMotion() {
   return reduced;
 }
 
-function useScrollY() {
-  const [y, setY] = useState(0);
-  useEffect(() => {
-    let raf = 0;
-    const onScroll = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => setY(window.scrollY || 0));
-    };
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener("scroll", onScroll);
-    };
-  }, []);
-  return y;
-}
-
 function Reveal({ children, delay = 0, className = "" }) {
   const ref = useRef(null);
   const [ok, setOk] = useState(false);
   const reduced = useReducedMotion();
 
   useEffect(() => {
-    if (reduced) {
-      setOk(true);
-      return;
-    }
+    if (reduced) return setOk(true);
     const el = ref.current;
     if (!el) return;
 
@@ -53,9 +32,8 @@ function Reveal({ children, delay = 0, className = "" }) {
           io.disconnect();
         }
       },
-      { threshold: 0.12 }
+      { threshold: 0.14 }
     );
-
     io.observe(el);
     return () => io.disconnect();
   }, [reduced]);
@@ -63,7 +41,7 @@ function Reveal({ children, delay = 0, className = "" }) {
   return (
     <div
       ref={ref}
-      className={`reveal ${ok ? "in" : ""} ${className}`}
+      className={`rv ${ok ? "in" : ""} ${className}`}
       style={{ "--d": `${delay}ms` }}
     >
       {children}
@@ -71,69 +49,38 @@ function Reveal({ children, delay = 0, className = "" }) {
   );
 }
 
-function ExampleCard({ img, title, tag, city, href = "/builder" }) {
+function MiniExample({ img, label }) {
   return (
-    <a className="exCard" href={href} aria-label={`Créer un site comme ${title}`}>
-      <div className="exMedia">
-        <img src={img} alt={`Exemple site ${title}`} />
-        <div className="exGlow" aria-hidden="true" />
-        <div className="exOverlay" aria-hidden="true">
-          <div className="exTop">
-            <span className="chip">Exemple</span>
-            <span className="chip ghost">1€ / mois</span>
-          </div>
-          <div className="exBottom">
-            <div className="exTitle">{title}</div>
-            <div className="exMeta">
-              <span className="tag">{tag}</span>
-              <span className="dot" />
-              <span className="city">{city}</span>
-            </div>
-            <div className="exCtaRow">
-              <span className="miniBtn">Voir le style</span>
-              <span className="miniBtn ghost">Créer le mien</span>
-            </div>
-          </div>
-        </div>
+    <a className="miniCard" href="/builder" aria-label={`Créer mon site (${label})`}>
+      <div className="miniMedia">
+        <img src={img} alt={`Exemple ${label}`} loading="lazy" />
+        <div className="miniShade" aria-hidden="true" />
+        <div className="miniCap">{label}</div>
       </div>
     </a>
   );
 }
 
 export default function HomeClient() {
-  const reduced = useReducedMotion();
-  const y = useScrollY();
-
-  const heroParallax = useMemo(() => {
-    if (reduced) return "translate3d(0,0,0)";
-    const t = Math.min(y, 320) * 0.12;
-    return `translate3d(0, ${t}px, 0)`;
-  }, [y, reduced]);
-
   return (
     <>
       <main className="page">
-        {/* NAV */}
-        <header className="nav">
-          <div className="wrap navInner">
-            <a className="brand" href="#top" aria-label="Spectra Media AI">
-              <img
-                className="logo"
-                src="/spectra_media_logo.png"
-                alt="Spectra Media AI"
-              />
+        {/* TOP BAR */}
+        <header className="top">
+          <div className="wrap topInner">
+            <a className="brand" href="/" aria-label="Spectra Media AI">
+              <img className="logo" src="/spectra_media_logo.png" alt="Spectra Media AI" />
               <div className="brandTxt">
                 <div className="brandName">Spectra Media AI</div>
-                <div className="brandSub">Sites vitrines premium + option IA</div>
+                <div className="brandSub">Site vitrine premium • option Betty IA</div>
               </div>
             </a>
 
-            <nav className="links" aria-label="Navigation">
+            <nav className="nav">
               <a href="#exemples">Exemples</a>
-              <a href="#process">Process</a>
-              <a href="#preuves">Preuves</a>
+              <a href="#comment">Comment ça marche</a>
               <a href="#faq">FAQ</a>
-              <a className="ctaNav" href="/builder">
+              <a className="btn btnSmall" href="/builder">
                 Créer mon site
               </a>
             </nav>
@@ -141,295 +88,178 @@ export default function HomeClient() {
         </header>
 
         {/* HERO */}
-        <section id="top" className="hero">
-          <div className="bg" aria-hidden="true" />
-          <div className="noise" aria-hidden="true" />
-
+        <section className="hero">
           <div className="wrap heroGrid">
             <div className="heroLeft">
               <Reveal delay={0}>
-                <div className="kickers">
-                  <span className="kicker">
-                    <span className="spark" aria-hidden="true" />
-                    Offre transparente • mise en ligne automatique
-                  </span>
-                  <span className="pill">Stripe</span>
-                  <span className="pill">Sans engagement</span>
+                <div className="badgeRow">
+                  <span className="badge">Offre transparente</span>
+                  <span className="badge ghost">Sans engagement</span>
+                  <span className="badge ghost">Stripe</span>
                 </div>
               </Reveal>
 
-              <Reveal delay={80}>
+              <Reveal delay={60}>
                 <h1 className="h1">
                   Un site <span className="grad">vraiment pro</span>
                   <br />
-                  à{" "}
-                  <span className="price">
-                    1&nbsp;€<span className="per">/mois</span>
-                  </span>
+                  pour <span className="price">1€ / mois</span>
                 </h1>
               </Reveal>
 
-              <Reveal delay={140}>
+              <Reveal delay={120}>
                 <p className="lead">
-                  Vous répondez à quelques questions. On génère une vitrine claire,
-                  élégante et orientée contact (image IA incluse), puis vous recevez
-                  l’URL par email.
+                  Tu réponds à quelques questions → on génère un design propre et une image de fond →
+                  tu reçois ton URL. Clair, élégant, orienté “contact”.
                 </p>
               </Reveal>
 
-              <Reveal delay={200}>
+              <Reveal delay={180}>
                 <div className="ctaRow">
-                  <a className="ctaPrimary" href="/builder">
-                    Créer mon site maintenant
+                  <a className="btn" href="/builder">
+                    Créer mon site (1€)
                   </a>
-                  <a className="ctaGhost" href="#exemples">
+                  <a className="btn ghost" href="#exemples">
                     Voir des exemples
                   </a>
                 </div>
                 <div className="micro">
-                  Sans engagement • Paiement mensuel via Stripe • Annulable à tout
-                  moment
+                  Paiement mensuel • Annulable à tout moment • Envoi automatique par email
                 </div>
               </Reveal>
 
-              <Reveal delay={260}>
-                <div className="trustRow">
-                  <div className="trust">✅ Page claire + contact</div>
-                  <div className="trust">✅ Image de fond générée (IA)</div>
-                  <div className="trust">✅ Adapté à votre métier + ville</div>
-                </div>
-              </Reveal>
-            </div>
-
-            <div className="heroRight" style={{ transform: heroParallax }}>
-              <Reveal delay={120} className="stack">
-                <div className="device">
-                  <div className="deviceTop">
-                    <div className="dots" aria-hidden="true">
-                      <span />
-                      <span />
-                      <span />
-                    </div>
-                    <div className="url">votre-site.en-ligne</div>
-                    <div className="live">LIVE</div>
-                  </div>
-
-                  <div className="deviceBody">
-                    <div className="heroMock">
-                      <div className="heroMockShade" aria-hidden="true" />
-                      <div className="heroMockTxt">
-                        <div className="mockTitle">Nom de votre enseigne</div>
-                        <div className="mockSub">Votre métier • Votre ville</div>
-                        <div className="mockBtns">
-                          <span className="mockBtn">Appeler</span>
-                          <span className="mockBtn ghost">Demander un devis</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="bullets">
-                      <div className="bullet">
-                        <b>✔</b> Infos essentielles visibles
-                      </div>
-                      <div className="bullet">
-                        <b>✔</b> Formulaire prêt à convertir
-                      </div>
-                      <div className="bullet">
-                        <b>✔</b> Image IA premium
-                      </div>
-                      <div className="bullet">
-                        <b>＋</b> Option Betty (assistante IA)
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="shine" aria-hidden="true" />
-                </div>
-
-                <div className="kpis" aria-hidden="true">
-                  <div className="kpi">
-                    <div className="kpiN">1€</div>
-                    <div className="kpiL">par mois</div>
-                  </div>
-                  <div className="kpi">
-                    <div className="kpiN">3</div>
-                    <div className="kpiL">minutes</div>
-                  </div>
-                  <div className="kpi">
-                    <div className="kpiN">24/7</div>
-                    <div className="kpiL">visible</div>
-                  </div>
-                </div>
-              </Reveal>
-            </div>
-          </div>
-
-          <div className="sticky">
-            <a className="stickyBtn" href="/builder">
-              <span className="stickyStar" aria-hidden="true" />
-              Créer mon site à 1€
-            </a>
-          </div>
-        </section>
-
-        {/* EXEMPLES */}
-        <section id="exemples" className="section alt">
-          <div className="wrap">
-            <Reveal>
-              <div className="head">
-                <h2 className="h2">Exemples (tes 3 visuels)</h2>
-                <p className="sub">
-                  Rendu premium : survole pour voir l’overlay, le zoom, les détails.
-                </p>
-              </div>
-            </Reveal>
-
-            <div className="exGrid">
-              <Reveal delay={0}>
-                <ExampleCard
-                  img="/site1euroeste.png"
-                  title="Esthéticienne"
-                  tag="Beauté • RDV"
-                  city="Le Mans"
-                />
-              </Reveal>
-              <Reveal delay={120}>
-                <ExampleCard
-                  img="/site1euroimmo.png"
-                  title="Agent immobilier"
-                  tag="Immo • Estimation"
-                  city="Nantes"
-                />
-              </Reveal>
               <Reveal delay={240}>
-                <ExampleCard
-                  img="/site1euroarti.png"
-                  title="Artisan"
-                  tag="Devis • Intervention"
-                  city="Angers"
-                />
+                <div className="checks">
+                  <div className="check">✅ Mise en page premium</div>
+                  <div className="check">✅ Contact visible + action</div>
+                  <div className="check">✅ Adapté métier + ville</div>
+                </div>
               </Reveal>
             </div>
 
-            <Reveal delay={220}>
-              <div className="center">
-                <a className="ctaPrimary" href="/builder">
-                  Je crée mon site (1€)
+            <div className="heroRight">
+              <Reveal delay={120}>
+                <div className="heroCard">
+                  <div className="heroCardTop">
+                    <div className="dotRow" aria-hidden="true">
+                      <span />
+                      <span />
+                      <span />
+                    </div>
+                    <span className="chip">APERÇU</span>
+                  </div>
+
+                  <div className="heroMock">
+                    <div className="mockTitle">Nom de votre activité</div>
+                    <div className="mockSub">Métier • Ville</div>
+                    <div className="mockBtns">
+                      <span className="mockBtn">Appeler</span>
+                      <span className="mockBtn ghost">Devis</span>
+                    </div>
+                  </div>
+
+                  <div className="heroList">
+                    <div className="li">✔ Texte clair, alignements propres</div>
+                    <div className="li">✔ CTA visibles (appel / devis)</div>
+                    <div className="li">✔ Image IA cohérente</div>
+                    <div className="li">＋ Option Betty (assistante IA)</div>
+                  </div>
+                </div>
+              </Reveal>
+            </div>
+          </div>
+        </section>
+
+        {/* EXAMPLES (mini slider) */}
+        <section id="exemples" className="sec">
+          <div className="wrap">
+            <Reveal>
+              <div className="secHead">
+                <h2>Exemples</h2>
+                <p>Mini slider discret (petit format) pour donner l’idée sans exposer les détails.</p>
+              </div>
+            </Reveal>
+
+            <Reveal delay={80}>
+              <div className="slider" aria-label="Exemples de sites">
+                <MiniExample img="/site1euroeste.png" label="Esthéticienne" />
+                <MiniExample img="/site1euroimmo.png" label="Immobilier" />
+                <MiniExample img="/site1euroarti.png" label="Artisan" />
+                <div className="miniHint">
+                  <div className="miniHintBox">
+                    <div className="miniHintT">→ Glisse</div>
+                    <div className="miniHintS">ou scroll horizontal</div>
+                  </div>
+                </div>
+              </div>
+            </Reveal>
+
+            <Reveal delay={120}>
+              <div className="secCta">
+                <a className="btn" href="/builder">
+                  Je crée le mien
                 </a>
-                <div className="micro">Même rendu, adapté à ton métier + ville.</div>
+                <span className="micro">Même rendu, adapté à ton métier + ville.</span>
               </div>
             </Reveal>
           </div>
         </section>
 
-        {/* PROCESS */}
-        <section id="process" className="section">
+        {/* HOW */}
+        <section id="comment" className="sec alt">
           <div className="wrap">
             <Reveal>
-              <div className="head">
-                <h2 className="h2">Process ultra simple</h2>
-                <p className="sub">Tu remplis → on génère → tu reçois l’URL.</p>
+              <div className="secHead">
+                <h2>Comment ça marche</h2>
+                <p>Simple, rapide, propre.</p>
               </div>
             </Reveal>
 
             <div className="steps">
               <Reveal delay={0}>
                 <div className="step">
-                  <div className="stepN">1</div>
-                  <h3>Tu réponds à 6 questions</h3>
-                  <p>Métier, ville, nom, téléphone/email, description courte.</p>
+                  <div className="n">1</div>
+                  <h3>Tu réponds</h3>
+                  <p>Métier, ville, nom, téléphone/email, texte court.</p>
                 </div>
               </Reveal>
-
-              <Reveal delay={120}>
+              <Reveal delay={80}>
                 <div className="step">
-                  <div className="stepN">2</div>
-                  <h3>On fabrique un design premium</h3>
-                  <p>Image IA + structure “qui convertit” + contact clair.</p>
+                  <div className="n">2</div>
+                  <h3>On génère</h3>
+                  <p>Design premium + image IA + structure orientée contact.</p>
                 </div>
               </Reveal>
-
-              <Reveal delay={240}>
+              <Reveal delay={160}>
                 <div className="step">
-                  <div className="stepN">3</div>
-                  <h3>Tu reçois l’URL par mail</h3>
-                  <p>Ton site est en ligne. Tu le partages immédiatement.</p>
+                  <div className="n">3</div>
+                  <h3>Tu reçois l’URL</h3>
+                  <p>Ton site est en ligne, partage immédiat.</p>
                 </div>
               </Reveal>
             </div>
 
-            <Reveal delay={240}>
+            <Reveal delay={200}>
               <div className="banner">
                 <div>
-                  <div className="bannerT">Tu veux capter plus de demandes ?</div>
-                  <div className="bannerS">
-                    Ajoute Betty ensuite : réponses 24/7 + leads qualifiés.
-                  </div>
+                  <div className="bannerT">Option Betty (assistante IA)</div>
+                  <div className="bannerS">Répond 24/7 + récupère des leads qualifiés.</div>
                 </div>
-                <div className="bannerBtns">
-                  <a className="ctaPrimary" href="/builder">
-                    Démarrer
-                  </a>
-                  <a className="ctaGhost" href="#faq">
-                    Voir la FAQ
-                  </a>
-                </div>
+                <a className="btn" href="/builder">
+                  Démarrer
+                </a>
               </div>
             </Reveal>
-          </div>
-        </section>
-
-        {/* PREUVES */}
-        <section id="preuves" className="section alt">
-          <div className="wrap">
-            <Reveal>
-              <div className="head">
-                <h2 className="h2">Preuves & réassurance</h2>
-                <p className="sub">Landing pro = confiance. Confiance = demandes.</p>
-              </div>
-            </Reveal>
-
-            <div className="proofs">
-              <Reveal delay={0}>
-                <div className="proofCard">
-                  <div className="proofIcon">🔒</div>
-                  <div className="proofTitle">Stripe</div>
-                  <div className="proofText">
-                    Paiement sécurisé, mensuel, annulation immédiate.
-                  </div>
-                </div>
-              </Reveal>
-
-              <Reveal delay={120}>
-                <div className="proofCard">
-                  <div className="proofIcon">⚡</div>
-                  <div className="proofTitle">Rapide & clair</div>
-                  <div className="proofText">
-                    Une page qui va droit au but, optimisée “contact”.
-                  </div>
-                </div>
-              </Reveal>
-
-              <Reveal delay={240}>
-                <div className="proofCard">
-                  <div className="proofIcon">🎯</div>
-                  <div className="proofTitle">Adapté au métier</div>
-                  <div className="proofText">
-                    Structure calibrée selon activité + ville.
-                  </div>
-                </div>
-              </Reveal>
-            </div>
           </div>
         </section>
 
         {/* FAQ */}
-        <section id="faq" className="section">
+        <section id="faq" className="sec">
           <div className="wrap">
             <Reveal>
-              <div className="head">
-                <h2 className="h2">FAQ</h2>
-                <p className="sub">Réponses nettes.</p>
+              <div className="secHead">
+                <h2>FAQ</h2>
+                <p>Réponses nettes, pas de blabla.</p>
               </div>
             </Reveal>
 
@@ -437,1083 +267,320 @@ export default function HomeClient() {
               <Reveal delay={0}>
                 <details className="qa">
                   <summary>Pourquoi 1€ ?</summary>
-                  <div className="qaBody">
-                    Offre d’entrée simple : tu testes sans stress. Résiliable quand tu
-                    veux.
+                  <div className="a">
+                    Offre d’entrée pour tester sans stress. Tu gardes si ça te plaît. Tu arrêtes quand tu veux.
                   </div>
                 </details>
               </Reveal>
 
-              <Reveal delay={80}>
+              <Reveal delay={60}>
                 <details className="qa">
                   <summary>Je reçois l’URL quand ?</summary>
-                  <div className="qaBody">
-                    Après création via le builder : email envoyé avec ton lien.
-                  </div>
+                  <div className="a">Après le builder : email envoyé avec ton lien.</div>
                 </details>
               </Reveal>
 
-              <Reveal delay={160}>
+              <Reveal delay={120}>
                 <details className="qa">
                   <summary>Je peux ajouter Betty ensuite ?</summary>
-                  <div className="qaBody">
-                    Oui : réponse 24/7 + qualification (nom/email/téléphone/besoin).
-                  </div>
-                </details>
-              </Reveal>
-
-              <Reveal delay={240}>
-                <details className="qa">
-                  <summary>Je peux arrêter quand je veux ?</summary>
-                  <div className="qaBody">Oui. Mensuel, annulable à tout moment.</div>
+                  <div className="a">Oui : réponses 24/7 + collecte nom/email/téléphone/besoin.</div>
                 </details>
               </Reveal>
             </div>
 
-            <Reveal delay={240}>
-              <div className="center">
-                <a className="ctaPrimary" href="/builder">
-                  Ok, je le fais (1€)
+            <Reveal delay={160}>
+              <div className="secCta">
+                <a className="btn" href="/builder">
+                  OK, je le fais
                 </a>
-                <div className="micro">Tu peux avoir un rendu propre aujourd’hui.</div>
+                <span className="micro">Objectif : pro + simple + efficace.</span>
               </div>
             </Reveal>
           </div>
         </section>
 
         {/* FOOT */}
-        <footer className="footer">
+        <footer className="foot">
           <div className="wrap footInner">
             <div>
               <div className="footBrand">Spectra Media AI</div>
-              <div className="footSub">
-                Sites vitrines premium + option IA • Pensé pour TPE, indépendants,
-                artisans.
-              </div>
+              <div className="footSub">Sites vitrines premium • option IA • pensé pour TPE</div>
             </div>
             <div className="footLinks">
               <a href="#exemples">Exemples</a>
-              <a href="#process">Process</a>
+              <a href="#comment">Process</a>
               <a href="#faq">FAQ</a>
-              <a href="mailto:spectramediabots@gmail.com">Contact</a>
             </div>
           </div>
         </footer>
       </main>
 
       <style jsx global>{`
-        :root {
-          --bg0: #020617;
-          --card: rgba(255, 255, 255, 0.06);
-          --line: rgba(148, 163, 184, 0.18);
-          --text: #e5e7eb;
-          --shadow: 0 26px 95px rgba(0, 0, 0, 0.55);
+        :root{
+          --bg:#070a12;
+          --panel: rgba(255,255,255,.06);
+          --line: rgba(148,163,184,.18);
+          --txt: rgba(255,255,255,.92);
+          --muted: rgba(255,255,255,.68);
+          --shadow: 0 22px 70px rgba(0,0,0,.45);
         }
-        * {
-          box-sizing: border-box;
-        }
-        html,
-        body {
-          margin: 0;
-          padding: 0;
-          background: var(--bg0);
-          color: var(--text);
-        }
-        a {
-          color: inherit;
-        }
-        .wrap {
-          max-width: 1160px;
-          margin: 0 auto;
-          padding: 0 22px;
-        }
-        html {
-          scroll-behavior: smooth;
-        }
+        *{box-sizing:border-box}
+        html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial}
+        a{color:inherit}
+        .wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+        .page{min-height:100vh}
 
-        .nav {
-          position: sticky;
-          top: 0;
-          z-index: 50;
-          background: rgba(2, 6, 23, 0.72);
+        /* Top */
+        .top{
+          position:sticky; top:0; z-index:50;
+          background: rgba(7,10,18,.72);
           border-bottom: 1px solid var(--line);
-          backdrop-filter: blur(12px);
+          backdrop-filter: blur(10px);
         }
-        .navInner {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 14px 0;
-          gap: 14px;
-        }
-        .brand {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          text-decoration: none;
-          min-width: 240px;
-        }
-        .logo {
-          width: 44px;
-          height: 44px;
-          border-radius: 14px;
-          border: 1px solid rgba(148, 163, 184, 0.18);
-          background: rgba(255, 255, 255, 0.04);
-          padding: 6px;
-          object-fit: contain;
-          box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
-        }
-        .brandName {
-          font-weight: 980;
-          letter-spacing: -0.02em;
-        }
-        .brandSub {
-          font-size: 12px;
-          opacity: 0.78;
-          margin-top: 2px;
-        }
-        .links {
-          display: flex;
-          align-items: center;
-          gap: 14px;
-          flex-wrap: wrap;
-          justify-content: flex-end;
-        }
-        .links a {
-          text-decoration: none;
-          font-size: 13px;
-          opacity: 0.86;
-          padding: 8px 10px;
-          border-radius: 999px;
-          border: 1px solid transparent;
-          transition: filter 0.15s ease, background 0.15s ease,
-            border-color 0.15s ease;
-        }
-        .links a:hover {
-          opacity: 1;
-          border-color: rgba(148, 163, 184, 0.16);
-          background: rgba(255, 255, 255, 0.04);
-          filter: brightness(1.03);
-        }
-        .ctaNav {
-          font-weight: 950;
-          border: 1px solid rgba(250, 204, 21, 0.35) !important;
-          background: linear-gradient(
-              90deg,
-              rgba(250, 204, 21, 0.18),
-              rgba(251, 113, 133, 0.14),
-              rgba(59, 130, 246, 0.14)
-            ) !important;
-          box-shadow: 0 18px 55px rgba(0, 0, 0, 0.35);
-        }
-        @media (max-width: 980px) {
-          .navInner {
-            flex-direction: column;
-            align-items: flex-start;
-          }
-          .links {
-            justify-content: flex-start;
-          }
+        .topInner{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 0}
+        .brand{display:flex;align-items:center;gap:12px;text-decoration:none}
+        .logo{width:40px;height:40px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid var(--line);padding:6px;object-fit:contain}
+        .brandName{font-weight:900;letter-spacing:-.02em}
+        .brandSub{font-size:12px;color:var(--muted)}
+        .nav{display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+        .nav a{font-size:13px;text-decoration:none;color:var(--muted);padding:8px 10px;border-radius:999px}
+        .nav a:hover{color:var(--txt);background:rgba(255,255,255,.04)}
+        @media (max-width:860px){
+          .topInner{flex-direction:column;align-items:flex-start}
+          .nav{justify-content:flex-start}
         }
 
-        .hero {
-          position: relative;
-          padding: 58px 0 30px;
-          border-bottom: 1px solid rgba(148, 163, 184, 0.1);
-          overflow: hidden;
-          background: radial-gradient(
-              circle at 10% 12%,
-              rgba(34, 211, 238, 0.24),
-              transparent 52%
-            ),
-            radial-gradient(
-              circle at 85% 18%,
-              rgba(236, 72, 153, 0.18),
-              transparent 54%
-            ),
-            radial-gradient(
-              circle at 35% 120%,
-              rgba(250, 204, 21, 0.14),
-              transparent 55%
-            ),
-            linear-gradient(180deg, rgba(7, 10, 24, 1), rgba(2, 6, 23, 0.88));
+        /* Buttons */
+        .btn{
+          display:inline-flex;align-items:center;justify-content:center;
+          text-decoration:none;font-weight:900;font-size:14px;
+          padding:12px 16px;border-radius:999px;
+          color:#071018;
+          background: linear-gradient(90deg,#22c55e,#3b82f6,#ec4899);
+          box-shadow: var(--shadow);
+          transition: transform .15s ease, filter .15s ease;
+          border: none;
         }
-        .bg {
-          position: absolute;
-          inset: -140px;
-          background: radial-gradient(
-              circle at 30% 30%,
-              rgba(255, 255, 255, 0.12),
-              transparent 42%
-            ),
-            radial-gradient(
-              circle at 70% 35%,
-              rgba(255, 255, 255, 0.08),
-              transparent 46%
-            );
-          filter: blur(2px);
-          pointer-events: none;
-          animation: slowFloat 8s ease-in-out infinite;
-          opacity: 0.85;
+        .btn:hover{transform: translateY(-2px); filter: brightness(1.05)}
+        .btn.ghost{
+          color:var(--txt);
+          background: rgba(255,255,255,.04);
+          border: 1px solid var(--line);
+          box-shadow:none;
         }
-        .noise {
-          position: absolute;
-          inset: 0;
-          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='210' height='210'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='210' height='210' filter='url(%23n)' opacity='.14'/%3E%3C/svg%3E");
-          mix-blend-mode: overlay;
-          opacity: 0.22;
-          pointer-events: none;
-        }
-        @keyframes slowFloat {
-          0%,
-          100% {
-            transform: translate3d(0, 0, 0) scale(1);
-          }
-          50% {
-            transform: translate3d(0, 10px, 0) scale(1.02);
-          }
-        }
+        .btnSmall{padding:10px 14px;font-size:13px}
 
-        .heroGrid {
-          position: relative;
-          display: grid;
-          grid-template-columns: 1.08fr 0.92fr;
+        /* Hero */
+        .hero{
+          padding: 44px 0 10px;
+          background:
+            radial-gradient(circle at 12% 10%, rgba(59,130,246,.22), transparent 50%),
+            radial-gradient(circle at 82% 20%, rgba(236,72,153,.18), transparent 50%),
+            radial-gradient(circle at 40% 100%, rgba(34,197,94,.14), transparent 55%);
+          border-bottom: 1px solid rgba(148,163,184,.10);
+        }
+        .heroGrid{
+          display:grid;
+          grid-template-columns: 1.15fr .85fr;
           gap: 22px;
-          align-items: start;
+          align-items:start;
         }
-        @media (max-width: 980px) {
-          .heroGrid {
-            grid-template-columns: 1fr;
-          }
-        }
+        @media (max-width:980px){ .heroGrid{grid-template-columns:1fr} }
 
-        .kickers {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 10px;
-          align-items: center;
-          margin-bottom: 12px;
+        .badgeRow{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+        .badge{
+          font-size:12px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;
+          padding:8px 10px;border-radius:999px;
+          border:1px solid rgba(250,204,21,.30);
+          background: rgba(250,204,21,.12);
         }
-        .kicker {
-          display: inline-flex;
-          align-items: center;
-          gap: 10px;
-          font-size: 12px;
-          letter-spacing: 0.14em;
-          text-transform: uppercase;
-          border: 1px solid rgba(148, 163, 184, 0.18);
-          background: rgba(255, 255, 255, 0.04);
-          padding: 9px 12px;
-          border-radius: 999px;
+        .badge.ghost{border:1px solid var(--line);background: rgba(255,255,255,.04);color:var(--muted);letter-spacing:.08em}
+        .h1{
+          margin:0 0 10px;
+          font-size: clamp(2.1rem, 4.2vw, 3.2rem);
+          line-height: 1.05;
+          letter-spacing: -.045em;
+          font-weight: 950;
         }
-        .spark {
-          width: 16px;
-          height: 16px;
-          border-radius: 999px;
-          background: radial-gradient(
-            circle at 30% 30%,
-            #fff,
-            #facc15 55%,
-            #fb7185 100%
-          );
-          box-shadow: 0 0 0 6px rgba(250, 204, 21, 0.12);
-          animation: pop 2.6s ease-in-out infinite;
+        .grad{
+          background: linear-gradient(90deg,#facc15,#fb7185,#3b82f6);
+          -webkit-background-clip:text;background-clip:text;color:transparent;
         }
-        @keyframes pop {
-          0%,
-          100% {
-            transform: scale(1);
-          }
-          50% {
-            transform: scale(1.08);
-          }
-        }
-        .pill {
-          font-size: 12px;
-          opacity: 0.86;
-          padding: 9px 11px;
-          border-radius: 999px;
-          border: 1px solid rgba(148, 163, 184, 0.16);
-          background: rgba(255, 255, 255, 0.03);
-        }
-
-        .h1 {
-          margin: 6px 0 12px;
-          font-size: clamp(2.4rem, 4.6vw, 3.65rem);
-          line-height: 1.02;
-          letter-spacing: -0.045em;
-          font-weight: 990;
-        }
-        .grad {
-          background: linear-gradient(90deg, #facc15, #fb7185, #3b82f6);
-          -webkit-background-clip: text;
-          background-clip: text;
-          color: transparent;
-        }
-        .price {
-          display: inline-flex;
-          align-items: baseline;
-          gap: 8px;
-          padding: 6px 12px;
-          border-radius: 16px;
-          background: rgba(250, 204, 21, 0.12);
-          border: 1px solid rgba(250, 204, 21, 0.24);
-          box-shadow: 0 20px 65px rgba(0, 0, 0, 0.4);
-        }
-        .per {
-          font-size: 14px;
-          opacity: 0.85;
-          font-weight: 900;
-        }
-
-        .lead {
-          max-width: 680px;
-          font-size: 16px;
-          line-height: 1.6;
-          opacity: 0.92;
-          color: rgba(226, 232, 240, 0.88);
-          margin: 0 0 16px;
-        }
-
-        .ctaRow {
-          display: flex;
-          gap: 12px;
-          flex-wrap: wrap;
-          align-items: center;
-          margin-top: 10px;
-        }
-        .ctaPrimary {
-          text-decoration: none;
-          font-weight: 980;
-          font-size: 14px;
-          padding: 14px 18px;
-          border-radius: 999px;
-          color: #06121d;
-          background: linear-gradient(90deg, #22c55e, #3b82f6, #ec4899);
-          box-shadow: var(--shadow);
-          transition: transform 0.15s ease, filter 0.15s ease;
-        }
-        .ctaPrimary:hover {
-          transform: translateY(-2px);
-          filter: brightness(1.05);
-        }
-        .ctaGhost {
-          text-decoration: none;
-          font-weight: 930;
-          font-size: 14px;
-          padding: 14px 18px;
-          border-radius: 999px;
-          border: 1px solid rgba(148, 163, 184, 0.18);
-          background: rgba(255, 255, 255, 0.04);
-          color: rgba(226, 232, 240, 0.92);
-          transition: transform 0.15s ease, filter 0.15s ease;
-        }
-        .ctaGhost:hover {
-          transform: translateY(-2px);
-          filter: brightness(1.05);
-        }
-        .micro {
-          margin-top: 10px;
-          font-size: 12px;
-          opacity: 0.78;
-        }
-
-        .trustRow {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 10px;
-          margin-top: 14px;
-        }
-        .trust {
-          font-size: 13px;
-          padding: 10px 12px;
+        .price{
+          display:inline-block;
+          padding: 4px 10px;
           border-radius: 14px;
-          border: 1px solid rgba(148, 163, 184, 0.14);
-          background: rgba(255, 255, 255, 0.03);
-          box-shadow: 0 18px 55px rgba(0, 0, 0, 0.2);
+          background: rgba(255,255,255,.06);
+          border: 1px solid rgba(148,163,184,.22);
+        }
+        .lead{margin:0 0 14px;color:var(--muted);line-height:1.6;font-size:16px;max-width:56ch}
+        .ctaRow{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
+        .micro{margin-top:10px;color:var(--muted);font-size:12px}
+        .checks{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+        .check{
+          padding:10px 12px;border-radius:14px;
+          border:1px solid rgba(148,163,184,.18);
+          background: rgba(255,255,255,.03);
+          color: rgba(255,255,255,.86);
+          font-size:13px;
         }
 
-        .stack {
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-        }
-        .device {
-          border-radius: 24px;
-          border: 1px solid rgba(148, 163, 184, 0.2);
-          background: rgba(255, 255, 255, 0.04);
-          box-shadow: var(--shadow);
-          overflow: hidden;
-          position: relative;
-          transform: translateZ(0);
-        }
-        .deviceTop {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding: 12px 14px;
-          border-bottom: 1px solid rgba(148, 163, 184, 0.14);
-          background: rgba(2, 6, 23, 0.55);
-        }
-        .dots {
-          display: flex;
-          gap: 7px;
-        }
-        .dots span {
-          width: 10px;
-          height: 10px;
-          border-radius: 999px;
-          opacity: 0.92;
-        }
-        .dots span:nth-child(1) {
-          background: #fb7185;
-        }
-        .dots span:nth-child(2) {
-          background: #facc15;
-        }
-        .dots span:nth-child(3) {
-          background: #22c55e;
-        }
-        .url {
-          font-size: 12px;
-          opacity: 0.78;
-          flex: 1;
-        }
-        .live {
-          font-size: 11px;
-          font-weight: 980;
-          letter-spacing: 0.14em;
-          padding: 7px 10px;
-          border-radius: 999px;
-          border: 1px solid rgba(34, 211, 238, 0.26);
-          background: rgba(34, 211, 238, 0.1);
-        }
-        .deviceBody {
-          padding: 14px;
-        }
-        .heroMock {
-          height: 220px;
-          border-radius: 18px;
-          border: 1px solid rgba(148, 163, 184, 0.14);
-          background: radial-gradient(
-              circle at 20% 20%,
-              rgba(59, 130, 246, 0.22),
-              transparent 55%
-            ),
-            radial-gradient(
-              circle at 88% 35%,
-              rgba(236, 72, 153, 0.18),
-              transparent 60%
-            ),
-            radial-gradient(
-              circle at 40% 110%,
-              rgba(250, 204, 21, 0.12),
-              transparent 60%
-            ),
-            linear-gradient(135deg, rgba(0, 0, 0, 0.62), rgba(0, 0, 0, 0.2));
-          position: relative;
-          overflow: hidden;
-        }
-        .heroMockShade {
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(
-            180deg,
-            rgba(0, 0, 0, 0.06),
-            rgba(0, 0, 0, 0.78)
-          );
-        }
-        .heroMockTxt {
-          position: absolute;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          padding: 14px;
-        }
-        .mockTitle {
-          font-weight: 980;
-          letter-spacing: -0.02em;
-        }
-        .mockSub {
-          font-size: 12px;
-          opacity: 0.82;
-          margin-top: 4px;
-        }
-        .mockBtns {
-          display: flex;
-          gap: 10px;
-          margin-top: 10px;
-          flex-wrap: wrap;
-        }
-        .mockBtn {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          padding: 9px 11px;
-          border-radius: 999px;
-          font-size: 12px;
-          font-weight: 930;
-          background: rgba(250, 204, 21, 0.18);
-          border: 1px solid rgba(250, 204, 21, 0.22);
-        }
-        .mockBtn.ghost {
-          background: rgba(255, 255, 255, 0.04);
-          border: 1px solid rgba(148, 163, 184, 0.16);
-        }
-        .bullets {
-          margin-top: 12px;
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 10px;
-        }
-        .bullet {
-          font-size: 13px;
-          padding: 10px 12px;
-          border-radius: 14px;
-          border: 1px solid rgba(148, 163, 184, 0.14);
-          background: rgba(255, 255, 255, 0.03);
-          display: flex;
-          gap: 8px;
-          align-items: center;
-        }
-        .shine {
-          position: absolute;
-          inset: -40px;
-          background: radial-gradient(
-            circle at 25% 20%,
-            rgba(255, 255, 255, 0.18),
-            transparent 45%
-          );
-          transform: translateX(-45%);
-          animation: shine 3.2s ease-in-out infinite;
-          pointer-events: none;
-        }
-        @keyframes shine {
-          0%,
-          100% {
-            transform: translateX(-55%) rotate(8deg);
-            opacity: 0.25;
-          }
-          50% {
-            transform: translateX(35%) rotate(8deg);
-            opacity: 0.5;
-          }
-        }
-
-        .kpis {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 10px;
-        }
-        .kpi {
-          border-radius: 18px;
-          border: 1px solid rgba(148, 163, 184, 0.14);
-          background: rgba(255, 255, 255, 0.03);
-          padding: 12px;
-          text-align: center;
-          box-shadow: 0 18px 55px rgba(0, 0, 0, 0.2);
-        }
-        .kpiN {
-          font-size: 18px;
-          font-weight: 980;
-          letter-spacing: -0.02em;
-        }
-        .kpiL {
-          font-size: 12px;
-          opacity: 0.78;
-          margin-top: 4px;
-        }
-
-        .sticky {
-          position: fixed;
-          right: 16px;
-          bottom: 16px;
-          z-index: 60;
-          pointer-events: none;
-        }
-        .stickyBtn {
-          pointer-events: auto;
-          display: inline-flex;
-          align-items: center;
-          gap: 10px;
-          text-decoration: none;
-          font-weight: 980;
-          font-size: 13px;
-          padding: 12px 14px;
-          border-radius: 999px;
-          border: 1px solid rgba(250, 204, 21, 0.28);
-          background: linear-gradient(
-            90deg,
-            rgba(250, 204, 21, 0.2),
-            rgba(251, 113, 133, 0.14),
-            rgba(59, 130, 246, 0.14)
-          );
-          box-shadow: 0 18px 60px rgba(0, 0, 0, 0.45);
-          transition: transform 0.15s ease, filter 0.15s ease;
-        }
-        .stickyBtn:hover {
-          transform: translateY(-2px);
-          filter: brightness(1.06);
-        }
-        .stickyStar {
-          width: 18px;
-          height: 18px;
-          display: inline-block;
-          background: radial-gradient(
-            circle at 30% 30%,
-            #fff,
-            #facc15 55%,
-            #fb7185 100%
-          );
-          /* ✅ IMPORTANT: plus aucun caractère bizarre ici */
-          clip-path: polygon(
-            50% 0%,
-            61% 26%,
-            89% 28%,
-            68% 45%,
-            76% 72%,
-            50% 57%,
-            24% 72%,
-            32% 45%,
-            11% 28%,
-            39% 26%
-          );
-          filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.25));
-          animation: starPop 2.6s ease-in-out infinite;
-        }
-        @keyframes starPop {
-          0%,
-          100% {
-            transform: rotate(0) scale(1);
-          }
-          50% {
-            transform: rotate(-6deg) scale(1.06);
-          }
-        }
-        @media (max-width: 720px) {
-          .sticky {
-            left: 12px;
-            right: 12px;
-            bottom: 12px;
-          }
-          .stickyBtn {
-            width: 100%;
-            justify-content: center;
-          }
-        }
-
-        .section {
-          padding: 54px 0;
-          border-bottom: 1px solid rgba(148, 163, 184, 0.1);
-        }
-        .section.alt {
-          background: radial-gradient(
-              circle at 12% 20%,
-              rgba(250, 204, 21, 0.1),
-              transparent 55%
-            ),
-            radial-gradient(
-              circle at 88% 70%,
-              rgba(59, 130, 246, 0.1),
-              transparent 55%
-            ),
-            rgba(2, 6, 23, 0.55);
-        }
-        .head {
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-          margin-bottom: 18px;
-        }
-        .h2 {
-          margin: 0;
-          font-size: 28px;
-          letter-spacing: -0.02em;
-          font-weight: 990;
-        }
-        .sub {
-          margin: 0;
-          opacity: 0.84;
-          max-width: 880px;
-          line-height: 1.55;
-        }
-
-        .exGrid {
-          display: grid;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-          gap: 14px;
-        }
-        @media (max-width: 980px) {
-          .exGrid {
-            grid-template-columns: 1fr;
-          }
-        }
-
-        .exCard {
-          text-decoration: none;
-          border-radius: 26px;
-          overflow: hidden;
-          border: 1px solid rgba(148, 163, 184, 0.16);
-          background: rgba(255, 255, 255, 0.03);
-          box-shadow: 0 22px 80px rgba(0, 0, 0, 0.35);
-          transform: translateZ(0);
-          transition: transform 0.18s ease, filter 0.18s ease;
-        }
-        .exCard:hover {
-          transform: translateY(-4px);
-          filter: brightness(1.04);
-        }
-        .exMedia {
-          position: relative;
-          height: 360px;
-        }
-        .exMedia img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          display: block;
-          transform: scale(1.02);
-          transition: transform 0.35s ease;
-        }
-        .exCard:hover .exMedia img {
-          transform: scale(1.06);
-        }
-        .exGlow {
-          position: absolute;
-          inset: -40px;
-          background: radial-gradient(
-              circle at 20% 20%,
-              rgba(34, 211, 238, 0.18),
-              transparent 45%
-            ),
-            radial-gradient(
-              circle at 85% 35%,
-              rgba(236, 72, 153, 0.14),
-              transparent 55%
-            ),
-            radial-gradient(
-              circle at 40% 110%,
-              rgba(250, 204, 21, 0.1),
-              transparent 55%
-            );
-          opacity: 0.75;
-          pointer-events: none;
-        }
-        .exOverlay {
-          position: absolute;
-          inset: 0;
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-          padding: 14px;
-          background: linear-gradient(
-            180deg,
-            rgba(0, 0, 0, 0.06),
-            rgba(0, 0, 0, 0.78)
-          );
-        }
-        .exTop {
-          display: flex;
-          gap: 10px;
-          flex-wrap: wrap;
-        }
-        .chip {
-          font-size: 11px;
-          font-weight: 980;
-          letter-spacing: 0.14em;
-          text-transform: uppercase;
-          padding: 7px 10px;
-          border-radius: 999px;
-          border: 1px solid rgba(250, 204, 21, 0.28);
-          background: rgba(250, 204, 21, 0.12);
-        }
-        .chip.ghost {
-          border: 1px solid rgba(148, 163, 184, 0.16);
-          background: rgba(255, 255, 255, 0.04);
-          opacity: 0.9;
-        }
-        .exBottom {
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-        }
-        .exTitle {
-          font-weight: 990;
-          letter-spacing: -0.02em;
-          font-size: 16px;
-        }
-        .exMeta {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          flex-wrap: wrap;
-          font-size: 12px;
-          opacity: 0.88;
-        }
-        .tag {
-          padding: 6px 10px;
-          border-radius: 999px;
-          border: 1px solid rgba(148, 163, 184, 0.16);
-          background: rgba(255, 255, 255, 0.04);
-        }
-        .dot {
-          width: 4px;
-          height: 4px;
-          border-radius: 999px;
-          background: rgba(226, 232, 240, 0.75);
-        }
-        .exCtaRow {
-          display: flex;
-          gap: 10px;
-          flex-wrap: wrap;
-          margin-top: 2px;
-        }
-        .miniBtn {
-          font-size: 12px;
-          font-weight: 930;
-          padding: 8px 10px;
-          border-radius: 999px;
-          border: 1px solid rgba(250, 204, 21, 0.22);
-          background: rgba(250, 204, 21, 0.12);
-        }
-        .miniBtn.ghost {
-          border: 1px solid rgba(148, 163, 184, 0.16);
-          background: rgba(255, 255, 255, 0.04);
-        }
-
-        .center {
-          margin-top: 18px;
-          text-align: center;
-        }
-
-        .steps {
-          display: grid;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-          gap: 12px;
-        }
-        @media (max-width: 980px) {
-          .steps {
-            grid-template-columns: 1fr;
-          }
-        }
-        .step {
+        .heroCard{
           border-radius: 22px;
-          border: 1px solid rgba(148, 163, 184, 0.16);
-          background: rgba(255, 255, 255, 0.03);
+          border: 1px solid rgba(148,163,184,.20);
+          background: rgba(255,255,255,.04);
+          box-shadow: var(--shadow);
+          overflow:hidden;
+        }
+        .heroCardTop{
+          display:flex;align-items:center;justify-content:space-between;
+          padding:12px 14px;
+          border-bottom:1px solid rgba(148,163,184,.14);
+          background: rgba(0,0,0,.18);
+        }
+        .dotRow{display:flex;gap:7px}
+        .dotRow span{width:10px;height:10px;border-radius:999px}
+        .dotRow span:nth-child(1){background:#fb7185}
+        .dotRow span:nth-child(2){background:#facc15}
+        .dotRow span:nth-child(3){background:#22c55e}
+        .chip{
+          font-size:11px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;
+          padding:7px 10px;border-radius:999px;border:1px solid rgba(148,163,184,.18);
+          color: var(--muted);
+          background: rgba(255,255,255,.03);
+        }
+        .heroMock{
           padding: 16px;
-          box-shadow: 0 18px 55px rgba(0, 0, 0, 0.25);
-          position: relative;
-          overflow: hidden;
+          background:
+            linear-gradient(180deg, rgba(255,255,255,.06), rgba(0,0,0,.18));
         }
-        .step:before {
-          content: "";
-          position: absolute;
-          inset: -40px;
-          background: radial-gradient(
-              circle at 30% 20%,
-              rgba(250, 204, 21, 0.12),
-              transparent 55%
-            ),
-            radial-gradient(
-              circle at 80% 70%,
-              rgba(34, 211, 238, 0.1),
-              transparent 55%
-            );
-          pointer-events: none;
+        .mockTitle{font-weight:950;letter-spacing:-.02em}
+        .mockSub{margin-top:4px;color:var(--muted);font-size:12px}
+        .mockBtns{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+        .mockBtn{
+          font-size:12px;font-weight:900;
+          padding:8px 10px;border-radius:999px;
+          border:1px solid rgba(250,204,21,.28);
+          background: rgba(250,204,21,.12);
         }
-        .stepN {
-          width: 40px;
-          height: 40px;
-          border-radius: 14px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-weight: 990;
-          background: rgba(34, 211, 238, 0.12);
-          border: 1px solid rgba(34, 211, 238, 0.22);
-          margin-bottom: 10px;
-          position: relative;
-        }
-        .step h3 {
-          margin: 0 0 6px;
-          font-size: 16px;
-          font-weight: 990;
-          position: relative;
-        }
-        .step p {
-          margin: 0;
-          opacity: 0.86;
-          line-height: 1.5;
-          font-size: 13px;
-          position: relative;
-        }
+        .mockBtn.ghost{border:1px solid rgba(148,163,184,.18);background: rgba(255,255,255,.03);color:var(--muted)}
+        .heroList{padding: 14px 16px;display:grid;gap:8px}
+        .li{color: rgba(255,255,255,.82);font-size:13px}
 
-        .banner {
+        /* Sections */
+        .sec{padding: 46px 0;border-bottom:1px solid rgba(148,163,184,.10)}
+        .sec.alt{
+          background: radial-gradient(circle at 10% 20%, rgba(250,204,21,.10), transparent 55%),
+                      radial-gradient(circle at 90% 70%, rgba(59,130,246,.10), transparent 55%);
+        }
+        .secHead h2{margin:0;font-size:26px;letter-spacing:-.02em}
+        .secHead p{margin:8px 0 0;color:var(--muted);max-width:70ch;line-height:1.6}
+        .secCta{margin-top:16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+
+        /* MINI SLIDER (200x200) */
+        .slider{
           margin-top: 18px;
-          border-radius: 24px;
-          border: 1px solid rgba(148, 163, 184, 0.18);
-          background: radial-gradient(
-              circle at 12% 25%,
-              rgba(34, 211, 238, 0.14),
-              transparent 55%
-            ),
-            radial-gradient(
-              circle at 88% 75%,
-              rgba(236, 72, 153, 0.12),
-              transparent 55%
-            ),
-            rgba(255, 255, 255, 0.03);
-          padding: 16px;
-          display: flex;
-          gap: 14px;
-          align-items: center;
-          justify-content: space-between;
-          flex-wrap: wrap;
-          box-shadow: 0 24px 90px rgba(0, 0, 0, 0.35);
+          display:flex;
+          gap:12px;
+          overflow-x:auto;
+          padding: 6px 2px 12px;
+          scroll-snap-type:x mandatory;
+          -webkit-overflow-scrolling: touch;
         }
-        .bannerT {
-          font-weight: 990;
-          letter-spacing: -0.02em;
-        }
-        .bannerS {
-          font-size: 13px;
-          opacity: 0.84;
-          margin-top: 4px;
-        }
-        .bannerBtns {
-          display: flex;
-          gap: 10px;
-          flex-wrap: wrap;
-        }
-
-        .proofs {
-          display: grid;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-          gap: 12px;
-        }
-        @media (max-width: 980px) {
-          .proofs {
-            grid-template-columns: 1fr;
-          }
-        }
-        .proofCard {
-          border-radius: 22px;
-          border: 1px solid rgba(148, 163, 184, 0.16);
-          background: rgba(255, 255, 255, 0.03);
-          padding: 16px;
-          box-shadow: 0 18px 55px rgba(0, 0, 0, 0.25);
-        }
-        .proofIcon {
-          font-size: 18px;
-        }
-        .proofTitle {
-          margin-top: 10px;
-          font-weight: 990;
-        }
-        .proofText {
-          margin-top: 6px;
-          font-size: 13px;
-          opacity: 0.86;
-          line-height: 1.5;
-        }
-
-        .faq {
-          display: grid;
-          gap: 10px;
-          max-width: 920px;
-        }
-        .qa {
+        .slider::-webkit-scrollbar{height:10px}
+        .slider::-webkit-scrollbar-thumb{background: rgba(255,255,255,.10);border-radius:999px}
+        .miniCard{scroll-snap-align:start;text-decoration:none}
+        .miniMedia{
+          width:200px;height:200px; /* ≈ 5cm */
           border-radius: 18px;
-          border: 1px solid rgba(148, 163, 184, 0.16);
-          background: rgba(255, 255, 255, 0.03);
+          overflow:hidden;
+          border:1px solid rgba(148,163,184,.18);
+          background: rgba(255,255,255,.03);
+          box-shadow: 0 16px 50px rgba(0,0,0,.35);
+          position:relative;
+          transform: translateZ(0);
+          transition: transform .15s ease, filter .15s ease;
+        }
+        .miniMedia:hover{transform: translateY(-2px); filter: brightness(1.03)}
+        .miniMedia img{width:100%;height:100%;object-fit:cover;display:block; transform: scale(1.02)}
+        .miniShade{
+          position:absolute; inset:0;
+          background: linear-gradient(180deg, rgba(0,0,0,.00), rgba(0,0,0,.62));
+          pointer-events:none;
+        }
+        .miniCap{
+          position:absolute; left:10px; right:10px; bottom:10px;
+          font-size:12px;font-weight:900;
+          color: rgba(255,255,255,.92);
+          letter-spacing:.02em;
+          display:flex;justify-content:space-between;align-items:center;
+        }
+        .miniHint{flex:0 0 auto;display:flex;align-items:center}
+        .miniHintBox{
+          width:200px;height:200px;border-radius:18px;
+          border:1px dashed rgba(148,163,184,.22);
+          display:flex;flex-direction:column;justify-content:center;align-items:center;
+          color: var(--muted); background: rgba(255,255,255,.02);
+        }
+        .miniHintT{font-weight:900}
+        .miniHintS{font-size:12px;margin-top:4px}
+
+        /* Steps */
+        .steps{margin-top:18px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+        @media (max-width:980px){ .steps{grid-template-columns:1fr} }
+        .step{
+          border-radius:18px;border:1px solid rgba(148,163,184,.16);
+          background: rgba(255,255,255,.03);
+          padding:16px;
+        }
+        .step .n{
+          width:34px;height:34px;border-radius:12px;
+          display:flex;align-items:center;justify-content:center;
+          font-weight:950;
+          background: rgba(59,130,246,.14);
+          border:1px solid rgba(59,130,246,.22);
+          margin-bottom:10px;
+        }
+        .step h3{margin:0 0 6px}
+        .step p{margin:0;color:var(--muted);line-height:1.55}
+
+        /* Banner */
+        .banner{
+          margin-top:18px;
+          border-radius:18px;border:1px solid rgba(148,163,184,.18);
+          background: rgba(255,255,255,.03);
+          padding:16px;
+          display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;
+        }
+        .bannerT{font-weight:950}
+        .bannerS{margin-top:4px;color:var(--muted);font-size:13px}
+
+        /* FAQ */
+        .faq{margin-top:18px;display:grid;gap:10px;max-width:860px}
+        .qa{
+          border-radius:16px;border:1px solid rgba(148,163,184,.16);
+          background: rgba(255,255,255,.03);
           padding: 12px 14px;
-          box-shadow: 0 18px 55px rgba(0, 0, 0, 0.18);
         }
-        .qa summary {
-          cursor: pointer;
-          font-weight: 990;
-          letter-spacing: -0.01em;
-        }
-        .qaBody {
-          margin-top: 10px;
-          opacity: 0.86;
-          line-height: 1.55;
-          font-size: 13px;
-        }
+        .qa summary{cursor:pointer;font-weight:900}
+        .qa .a{margin-top:10px;color:var(--muted);line-height:1.6}
 
-        .footer {
-          padding: 26px 0;
-          border-top: 1px solid rgba(148, 163, 184, 0.12);
-          background: rgba(2, 6, 23, 0.78);
-        }
-        .footInner {
-          display: flex;
-          align-items: flex-start;
-          justify-content: space-between;
-          gap: 12px;
-          flex-wrap: wrap;
-        }
-        .footBrand {
-          font-weight: 990;
-        }
-        .footSub {
-          font-size: 12px;
-          opacity: 0.78;
-          margin-top: 6px;
-          max-width: 560px;
-        }
-        .footLinks {
-          display: flex;
-          gap: 12px;
-          flex-wrap: wrap;
-        }
-        .footLinks a {
-          text-decoration: none;
-          font-size: 13px;
-          opacity: 0.84;
-          padding: 8px 10px;
-          border-radius: 999px;
-          border: 1px solid rgba(148, 163, 184, 0.14);
-          background: rgba(255, 255, 255, 0.03);
-        }
-        .footLinks a:hover {
-          opacity: 1;
-          filter: brightness(1.05);
-        }
+        /* Footer */
+        .foot{padding: 22px 0}
+        .footInner{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+        .footBrand{font-weight:950}
+        .footSub{margin-top:6px;color:var(--muted);font-size:12px}
+        .footLinks{display:flex;gap:12px;flex-wrap:wrap}
+        .footLinks a{font-size:13px;color:var(--muted);text-decoration:none;padding:8px 10px;border-radius:999px}
+        .footLinks a:hover{color:var(--txt);background: rgba(255,255,255,.04)}
 
-        .reveal {
-          opacity: 0;
-          transform: translateY(14px);
-          transition: opacity 600ms ease var(--d),
-            transform 700ms cubic-bezier(0.2, 0.8, 0.2, 1) var(--d);
-          will-change: opacity, transform;
-        }
-        .reveal.in {
-          opacity: 1;
-          transform: translateY(0);
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          .bg,
-          .shine,
-          .stickyStar,
-          .spark {
-            animation: none !important;
-          }
-          html {
-            scroll-behavior: auto;
-          }
-          .reveal {
-            opacity: 1 !important;
-            transform: none !important;
-            transition: none !important;
-          }
-          .exCard,
-          .ctaPrimary,
-          .ctaGhost,
-          .stickyBtn {
-            transition: none !important;
-          }
+        /* Reveal */
+        .rv{opacity:0;transform: translateY(10px);transition: opacity 520ms ease var(--d), transform 650ms cubic-bezier(.2,.8,.2,1) var(--d)}
+        .rv.in{opacity:1;transform: translateY(0)}
+        @media (prefers-reduced-motion: reduce){
+          .rv{opacity:1 !important;transform:none !important;transition:none !important}
+          html{scroll-behavior:auto}
+          .btn,.miniMedia{transition:none !important}
         }
       `}</style>
     </>
