@@ -17,9 +17,13 @@ export async function POST(req) {
     plan,
   } = b || {};
 
-  if (!metier || !nom_enseigne || !ville || !adresse || !telephone || !email) {
+  // Requis : métier, enseigne, ville, email (email = destinataire des leads).
+  // adresse / téléphone sont optionnels (souvent absents des annuaires).
+  if (!metier || !nom_enseigne || !ville || !email) {
     return NextResponse.json({ error: "Champs manquants" }, { status: 400 });
   }
+  const adresseSafe = adresse || "";
+  const telephoneSafe = telephone || "";
 
   const slug = (nom_enseigne || "site")
     .toLowerCase()
@@ -40,8 +44,8 @@ export async function POST(req) {
     metier,
     nom_enseigne,
     ville,
-    adresse,
-    telephone,
+    adresse: adresseSafe,
+    telephone: telephoneSafe,
     email,
     betty_on: plan === "site+betty" && !!betty_on,
     betty_public_id: bettyPublicId,
