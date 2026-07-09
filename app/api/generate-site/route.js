@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createSite } from "../../../lib/sites-db";
 import { generateHeroImageUrl } from "../../../lib/hero-image";
 import { sendSiteEmail } from "../../../lib/mail";
+import { getMetierById } from "../../../lib/metiers";
 
 export async function POST(req) {
   const b = await req.json();
@@ -30,6 +31,10 @@ export async function POST(req) {
   // Génère une image de fond (pour l'instant placeholder dans hero-image.js)
   const heroImageUrl = await generateHeroImageUrl(metier, nom_enseigne, ville);
 
+  // public_id du bot Betty : fourni explicitement, sinon déduit du métier.
+  const bettyPublicId =
+    b.betty_public_id || getMetierById(metier)?.betty_public_id || "";
+
   const site = {
     slug,
     metier,
@@ -39,6 +44,7 @@ export async function POST(req) {
     telephone,
     email,
     betty_on: plan === "site+betty" && !!betty_on,
+    betty_public_id: bettyPublicId,
     plan: plan || "site",
     hero_image_url: heroImageUrl,
     created_at: new Date().toISOString(),

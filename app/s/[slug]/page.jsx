@@ -12,6 +12,10 @@ export default async function Site({ params }) {
   }`;
   const bg = site.hero_image_url || "";
 
+  // public_id du bot Betty à embarquer : celui du site, sinon celui du métier.
+  const bettyId = site.betty_public_id || metier?.betty_public_id || "";
+  const bettyBase = process.env.NEXT_PUBLIC_BETTY_URL || "https://mybetty.online";
+
   return (
     <div
       style={{
@@ -94,7 +98,7 @@ export default async function Site({ params }) {
                 gap: 16,
               }}
             >
-              {site.betty_on && (
+              {site.betty_on && bettyId && (
                 <div
                   style={{
                     borderRadius: 16,
@@ -104,22 +108,30 @@ export default async function Site({ params }) {
                     height: 380,
                   }}
                 >
-                  <div
-                    style={{
-                      height: "100%",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: 14,
-                      color: "#ddd",
-                      padding: 16,
-                      textAlign: "center",
-                    }}
-                  >
-                    Ici, tu intègreras l’iframe de Betty métier
-                    <br />
-                    (public_id spécifique au métier).
-                  </div>
+                  <iframe
+                    src={`${bettyBase}/chat?public_id=${encodeURIComponent(
+                      bettyId
+                    )}&embed=1`}
+                    title={`Assistant Betty – ${site.nom_enseigne}`}
+                    style={{ width: "100%", height: "100%", border: 0 }}
+                    loading="lazy"
+                    allow="clipboard-read; clipboard-write"
+                  />
+                </div>
+              )}
+              {site.betty_on && !bettyId && (
+                <div
+                  style={{
+                    borderRadius: 16,
+                    background: "rgba(0,0,0,.5)",
+                    border: "1px solid rgba(255,255,255,.1)",
+                    padding: 16,
+                    fontSize: 13,
+                    color: "#ddd",
+                    textAlign: "center",
+                  }}
+                >
+                  Assistant Betty en cours d’activation pour ce métier.
                 </div>
               )}
 
