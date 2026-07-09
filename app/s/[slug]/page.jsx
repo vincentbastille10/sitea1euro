@@ -7,9 +7,21 @@ export default async function Site({ params }) {
 
   const metier = getMetierById(site.metier);
 
-  const title = `${site.nom_enseigne} – ${metier?.label || site.metier} à ${
-    site.ville
-  }`;
+  // Langue du site (fr par défaut, en pour les métiers US comme realtor)
+  const lang = metier?.lang === "en" ? "en" : "fr";
+  const t = lang === "en"
+    ? { in: "in", contact: "Contact", address: "Address", phone: "Phone", email: "Email",
+        writeUs: "Send us a message", yourName: "Your name", yourEmail: "Your email",
+        yourMessage: "Your message", send: "Send", poweredBy: "Powered by Spectra Media",
+        defaultPitch: "Professional service, by appointment, with a personal touch.",
+        bettyActivating: "Your Betty assistant is being activated." }
+    : { in: "à", contact: "Coordonnées", address: "Adresse", phone: "Téléphone", email: "Email",
+        writeUs: "Écrire un message", yourName: "Votre nom", yourEmail: "Votre email",
+        yourMessage: "Votre message", send: "Envoyer", poweredBy: "Propulsé par Spectra Media",
+        defaultPitch: "Accompagnement professionnel, sur rendez-vous, avec une approche personnalisée.",
+        bettyActivating: "Assistant Betty en cours d’activation pour ce métier." };
+
+  const title = `${site.nom_enseigne} – ${metier?.label || site.metier} ${t.in} ${site.ville}`;
   const bg = site.hero_image_url || "";
 
   // public_id du bot Betty à embarquer : celui du site, sinon celui du métier.
@@ -44,7 +56,7 @@ export default async function Site({ params }) {
           }}
         >
           <div style={{ fontWeight: 700 }}>{site.nom_enseigne}</div>
-          <div style={{ fontSize: 12, opacity: 0.8 }}>Propulsé par Spectra Media</div>
+          <div style={{ fontSize: 12, opacity: 0.8 }}>{t.poweredBy}</div>
         </header>
 
         <main style={{ maxWidth: 1100, margin: "0 auto", padding: "40px 24px" }}>
@@ -60,8 +72,7 @@ export default async function Site({ params }) {
             <div>
               <h1 style={{ fontSize: 32, marginBottom: 12 }}>{title}</h1>
               <p style={{ fontSize: 16, maxWidth: 520, lineHeight: 1.5 }}>
-                {metier?.pitch ||
-                  "Accompagnement professionnel, sur rendez-vous, avec une approche personnalisée."}
+                {metier?.pitch || t.defaultPitch}
               </p>
 
               <div
@@ -73,13 +84,13 @@ export default async function Site({ params }) {
                   background: "rgba(0,0,0,.4)",
                 }}
               >
-                <h2 style={{ fontSize: 18, marginBottom: 8 }}>Coordonnées</h2>
+                <h2 style={{ fontSize: 18, marginBottom: 8 }}>{t.contact}</h2>
                 <p style={{ margin: 0 }}>
-                  <strong>Adresse :</strong> {site.adresse}, {site.ville}
+                  <strong>{t.address} :</strong> {site.adresse}, {site.ville}
                   <br />
-                  <strong>Téléphone :</strong> {site.telephone}
+                  <strong>{t.phone} :</strong> {site.telephone}
                   <br />
-                  <strong>Email :</strong>{" "}
+                  <strong>{t.email} :</strong>{" "}
                   <a
                     href={`mailto:${site.email}`}
                     style={{ color: "#ffde8b", textDecoration: "none" }}
@@ -131,7 +142,7 @@ export default async function Site({ params }) {
                     textAlign: "center",
                   }}
                 >
-                  Assistant Betty en cours d’activation pour ce métier.
+                  {t.bettyActivating}
                 </div>
               )}
 
@@ -143,7 +154,7 @@ export default async function Site({ params }) {
                   padding: 16,
                 }}
               >
-                <h2 style={{ fontSize: 18, marginBottom: 8 }}>Écrire un message</h2>
+                <h2 style={{ fontSize: 18, marginBottom: 8 }}>{t.writeUs}</h2>
                 <form
                   action={`/api/contact/${params.slug}`}
                   method="POST"
@@ -155,7 +166,7 @@ export default async function Site({ params }) {
                 >
                   <input
                     name="name"
-                    placeholder="Votre nom"
+                    placeholder={t.yourName}
                     required
                     style={{
                       borderRadius: 8,
@@ -168,7 +179,7 @@ export default async function Site({ params }) {
                   <input
                     name="email"
                     type="email"
-                    placeholder="Votre email"
+                    placeholder={t.yourEmail}
                     required
                     style={{
                       borderRadius: 8,
@@ -180,7 +191,7 @@ export default async function Site({ params }) {
                   />
                   <textarea
                     name="message"
-                    placeholder="Votre message"
+                    placeholder={t.yourMessage}
                     required
                     rows={4}
                     style={{
@@ -206,7 +217,7 @@ export default async function Site({ params }) {
                       alignSelf: "flex-start",
                     }}
                   >
-                    Envoyer
+                    {t.send}
                   </button>
                 </form>
               </div>
