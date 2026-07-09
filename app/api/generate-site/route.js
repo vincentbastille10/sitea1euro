@@ -30,7 +30,9 @@ export async function POST(req) {
     .normalize("NFD")
     .replace(/\p{Diacritic}/gu, "")
     .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
+    .replace(/(^-|-$)/g, "")
+    .slice(0, 63)              // limite d'un label DNS (sous-domaine)
+    .replace(/-$/, "") || "site";
 
   // Génère une image de fond (pour l'instant placeholder dans hero-image.js)
   const heroImageUrl = await generateHeroImageUrl(metier, nom_enseigne, ville);
@@ -63,5 +65,11 @@ export async function POST(req) {
     console.error("Erreur envoi email site:", e);
   }
 
-  return NextResponse.json({ ok: true, url: `/s/${slug}` });
+  const rootDomain = process.env.ROOT_DOMAIN || "spectramedia.online";
+  return NextResponse.json({
+    ok: true,
+    slug,
+    url: `https://${slug}.${rootDomain}`,   // URL publique (sous-domaine)
+    path: `/s/${slug}`,                       // accès direct (fallback / preview)
+  });
 }
