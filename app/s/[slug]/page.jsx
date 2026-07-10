@@ -1,16 +1,69 @@
+import { cache } from "react";
 import { getSiteBySlug } from "../../../lib/sites-db";
 import { getMetierById } from "../../../lib/metiers";
 
+// React cache() : une seule requête DB par rendu, partagée entre
+// generateMetadata() et le composant de page.
+const getSite = cache(getSiteBySlug);
+
+function siteLang(site, metier) {
+  return (site.lang === "en" || site.lang === "fr")
+    ? site.lang
+    : (metier?.lang === "en" ? "en" : "fr");
+}
+
+// Type schema.org le plus précis disponible par métier (rich snippets Google) ;
+// LocalBusiness générique par défaut pour ne jamais surclamer un type spécialisé.
+const SCHEMA_TYPE = {
+  realtor: "RealEstateAgent", immobilier: "RealEstateAgent",
+  estheticienne: "BeautySalon", coiffeuse: "HairSalon",
+  plombier: "Plumber", artisan: "GeneralContractor",
+};
+
+export async function generateMetadata({ params }) {
+  const site = await getSite(params.slug);
+  if (!site) return { title: "Page introuvable" };
+
+  const metier = getMetierById(site.metier);
+  const lang = siteLang(site, metier);
+  const inWord = lang === "en" ? "in" : "à";
+  const title = `${site.nom_enseigne} – ${metier?.label || site.metier} ${inWord} ${site.ville}`;
+  const description = (
+    metier?.pitch ||
+    (lang === "en" ? "Professional service, by appointment." : "Accompagnement professionnel, sur rendez-vous.")
+  ).slice(0, 160);
+  const rootDomain = process.env.ROOT_DOMAIN || "spectramedia.online";
+  const url = `https://${site.slug}.${rootDomain}/`;
+
+  return {
+    title,
+    description,
+    alternates: { canonical: url },
+    robots: { index: true, follow: true },
+    openGraph: {
+      title,
+      description,
+      url,
+      siteName: site.nom_enseigne,
+      images: site.hero_image_url ? [{ url: site.hero_image_url, width: 1600, height: 896 }] : [],
+      locale: lang === "en" ? "en_US" : "fr_FR",
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: site.hero_image_url ? [site.hero_image_url] : [],
+    },
+  };
+}
+
 export default async function Site({ params }) {
-  const site = await getSiteBySlug(params.slug);
+  const site = await getSite(params.slug);
   if (!site) return <h1>Page introuvable</h1>;
 
   const metier = getMetierById(site.metier);
-
-  // Langue du site (fr par défaut, en pour les métiers US comme realtor)
-  const lang = (site.lang === "en" || site.lang === "fr")
-    ? site.lang
-    : (metier?.lang === "en" ? "en" : "fr");
+  const lang = siteLang(site, metier);
   const t = lang === "en"
     ? { in: "in", contact: "Contact", address: "Address", phone: "Phone", email: "Email",
         writeUs: "Send us a message", yourName: "Your name", yourEmail: "Your email",
@@ -30,6 +83,19 @@ export default async function Site({ params }) {
   const bettyId = site.betty_public_id || metier?.betty_public_id || "";
   const bettyBase = process.env.NEXT_PUBLIC_BETTY_URL || "https://mybetty.online";
 
+  const rootDomain = process.env.ROOT_DOMAIN || "spectramedia.online";
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": SCHEMA_TYPE[site.metier] || "LocalBusiness",
+    name: site.nom_enseigne,
+    ...(site.hero_image_url ? { image: site.hero_image_url } : {}),
+    url: `https://${site.slug}.${rootDomain}/`,
+    ...(site.telephone ? { telephone: site.telephone } : {}),
+    ...(site.email ? { email: site.email } : {}),
+    address: { "@type": "PostalAddress", ...(site.adresse ? { streetAddress: site.adresse } : {}), addressLocality: site.ville },
+    areaServed: site.ville,
+  };
+
   return (
     <div
       style={{
@@ -39,6 +105,10 @@ export default async function Site({ params }) {
         backgroundPosition: "center",
       }}
     >
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
+      />
       <div
         style={{
           minHeight: "100vh",
