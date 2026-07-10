@@ -15,6 +15,7 @@ export async function POST(req) {
     email,
     betty_on,
     plan,
+    lang,
   } = b || {};
 
   // Requis : métier, enseigne, ville, email (email = destinataire des leads).
@@ -51,6 +52,8 @@ export async function POST(req) {
     email,
     betty_on: plan === "site+betty" && !!betty_on,
     betty_public_id: bettyPublicId,
+    // langue explicite (déduite de la ville/région ciblée) prioritaire sur celle du métier
+    lang: (lang === "en" || lang === "fr") ? lang : "",
     plan: plan || "site",
     hero_image_url: heroImageUrl,
     created_at: new Date().toISOString(),

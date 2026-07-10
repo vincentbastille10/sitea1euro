@@ -8,7 +8,9 @@ export default async function Site({ params }) {
   const metier = getMetierById(site.metier);
 
   // Langue du site (fr par défaut, en pour les métiers US comme realtor)
-  const lang = metier?.lang === "en" ? "en" : "fr";
+  const lang = (site.lang === "en" || site.lang === "fr")
+    ? site.lang
+    : (metier?.lang === "en" ? "en" : "fr");
   const t = lang === "en"
     ? { in: "in", contact: "Contact", address: "Address", phone: "Phone", email: "Email",
         writeUs: "Send us a message", yourName: "Your name", yourEmail: "Your email",
