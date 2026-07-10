@@ -3,6 +3,7 @@ import { createSite } from "../../../lib/sites-db";
 import { generateHeroImageUrl } from "../../../lib/hero-image";
 import { sendSiteEmail } from "../../../lib/mail";
 import { getMetierById } from "../../../lib/metiers";
+import { upsertProspectBot } from "../../../lib/betty-bot";
 
 export async function POST(req) {
   const b = await req.json();
@@ -35,12 +36,32 @@ export async function POST(req) {
     .slice(0, 63)              // limite d'un label DNS (sous-domaine)
     .replace(/-$/, "") || "site";
 
-  // Génère une image de fond (pour l'instant placeholder dans hero-image.js)
-  const heroImageUrl = await generateHeroImageUrl(metier, nom_enseigne, ville);
+  // langue explicite (déduite de la ville/région ciblée) prioritaire sur celle du métier
+  const langSafe = (lang === "en" || lang === "fr")
+    ? lang
+    : (getMetierById(metier)?.lang === "en" ? "en" : "fr");
 
-  // public_id du bot Betty : fourni explicitement, sinon déduit du métier.
-  const bettyPublicId =
-    b.betty_public_id || getMetierById(metier)?.betty_public_id || "";
+  // Génère une image de fond, dans la langue du site
+  const heroImageUrl = await generateHeroImageUrl(metier, nom_enseigne, ville, langSafe);
+
+  // Bot Betty INDIVIDUEL à ce prospect (pas le bot démo partagé) : mémoire de
+  // conversation propre + leads captés envoyés à SON email. C'est ce bot qui
+  // est embarqué sur son site.
+  let bettyPublicId = "";
+  const info = getMetierById(metier);
+  try {
+    bettyPublicId = await upsertProspectBot({
+      email,
+      pack: info?.pack || "betty_neutre_001",
+      botKey: metier,
+      name: nom_enseigne,
+      metierLabel: info?.label || metier,
+      lang: langSafe,
+    });
+  } catch (e) {
+    console.error("[BETTY BOT] création échouée, repli sur le bot démo:", e);
+    bettyPublicId = b.betty_public_id || info?.betty_public_id || "";
+  }
 
   const site = {
     slug,
@@ -52,8 +73,7 @@ export async function POST(req) {
     email,
     betty_on: plan === "site+betty" && !!betty_on,
     betty_public_id: bettyPublicId,
-    // langue explicite (déduite de la ville/région ciblée) prioritaire sur celle du métier
-    lang: (lang === "en" || lang === "fr") ? lang : "",
+    lang: langSafe,
     plan: plan || "site",
     hero_image_url: heroImageUrl,
     created_at: new Date().toISOString(),

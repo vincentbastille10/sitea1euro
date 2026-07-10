@@ -21,9 +21,14 @@ export function middleware(req) {
     const sub = host.slice(0, -(rootDomain.length + 1));
     if (sub && !sub.includes(".") && !RESERVED.has(sub)) {
       const url = req.nextUrl.clone();
-      // On ne réécrit que la home du sous-domaine → le site du client.
+      // Home du sous-domaine → le site du client.
       if (url.pathname === "/") {
         url.pathname = `/s/${sub}`;
+        return NextResponse.rewrite(url);
+      }
+      // /pay (lien du bouton de paiement dans l'email) → la route de paiement.
+      if (url.pathname === "/pay") {
+        url.pathname = `/pay/${sub}`;
         return NextResponse.rewrite(url);
       }
     }
