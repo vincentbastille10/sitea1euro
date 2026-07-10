@@ -49,11 +49,34 @@ function findContactLink(html, base) {
 async function fetchText(url) {
   try {
     const r = await fetch(url, {
-      headers: { "User-Agent": "Mozilla/5.0 (compatible; HyperBetty/1.0)" },
+      headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36" },
       signal: AbortSignal.timeout(12000),
     });
     return await r.text();
   } catch { return ""; }
+}
+
+const PORTALS = ["bing.com", "microsoft.", "msn.com", "zillow", "realtor.com", "trulia",
+  "redfin", "homes.com", "yelp.", "facebook.", "linkedin.", "instagram.", "youtube.",
+  "twitter.", "x.com", "wikipedia.", "mapquest.", "indeed.", "glassdoor.", "apartments.com",
+  "loopnet.", "google.", "duckduckgo.", "pinterest.", "tiktok.", "reddit.", "bbb.org",
+  "yellowpages.", "angi.", "thumbtack.", "nextdoor."];
+
+// Découverte automatique : scrape Bing pour une requête → URLs de courtiers.
+async function discoverBrokers(query, n = 8) {
+  const html = await fetchText(`https://www.bing.com/search?q=${encodeURIComponent(query)}&count=25&setlang=en-US&cc=US`);
+  const hrefs = [...html.matchAll(/<a[^>]+href="(https?:\/\/[^"]+)"/gi)].map((m) => m[1]);
+  const seen = new Set(), out = [];
+  for (const h of hrefs) {
+    let host;
+    try { host = new URL(h).host.replace(/^www\./, "").toLowerCase(); } catch { continue; }
+    if (!host.includes(".") || PORTALS.some((p) => host.includes(p))) continue;
+    if (seen.has(host)) continue;
+    seen.add(host);
+    out.push("https://" + host + "/");
+    if (out.length >= n) break;
+  }
+  return out;
 }
 
 export async function POST(req) {
@@ -63,7 +86,19 @@ export async function POST(req) {
   }
   const plan = b.plan === "site" ? "site" : "site+betty";
   const dry = !!b.dry;
-  const urls = (b.urls || []).map((u) => (u || "").trim()).filter(Boolean).slice(0, 25);
+  let urls = (b.urls || []).map((u) => (u || "").trim()).filter(Boolean);
+  const discovered = [];
+  // Mode auto-découverte : les lignes sont des VILLES → on trouve les courtiers.
+  if (b.discover) {
+    const cities = urls.slice(0, 10);
+    urls = [];
+    for (const city of cities) {
+      const found = await discoverBrokers(`real estate brokerage ${city}`, 8);
+      for (const f of found) if (!urls.includes(f)) urls.push(f);
+      discovered.push({ city, found: found.length });
+    }
+  }
+  urls = urls.slice(0, 25);
   const origin = new URL(req.url).origin;
   const results = [];
 
@@ -96,5 +131,5 @@ export async function POST(req) {
   }
 
   const created = results.filter((r) => r.site_url).length;
-  return NextResponse.json({ results, count: results.length, created });
+  return NextResponse.json({ results, count: results.length, created, discovered });
 }

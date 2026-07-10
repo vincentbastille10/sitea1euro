@@ -6,6 +6,7 @@ export default function HyperBetty() {
   const [urls, setUrls] = useState("");
   const [plan, setPlan] = useState("site+betty");
   const [dry, setDry] = useState(true);
+  const [discover, setDiscover] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [rows, setRows] = useState([]);
@@ -22,12 +23,13 @@ export default function HyperBetty() {
       const r = await fetch("/api/run", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password, urls: list, plan, dry }),
+        body: JSON.stringify({ password, urls: list, plan, dry, discover }),
       });
       const d = await r.json();
       if (!r.ok) { setError(d.error === "unauthorized" ? "Mot de passe incorrect." : (d.error || "Erreur.")); setLoading(false); return; }
       setRows(d.results || []);
-      setSummary(dry ? `Aperçu de ${d.count} courtiers.` : `${d.created}/${d.count} sites créés + emails envoyés.`);
+      const disc = (d.discovered && d.discovered.length) ? `${d.count} courtiers trouvés dans ${d.discovered.length} ville(s). ` : "";
+      setSummary(disc + (dry ? "Aperçu (rien créé)." : `${d.created}/${d.count} sites créés + emails envoyés.`));
     } catch (e) { setError("Erreur réseau: " + e.message); }
     setLoading(false);
   }
@@ -53,8 +55,8 @@ export default function HyperBetty() {
       <label style={S.label}>Mot de passe</label>
       <input style={{ ...S.input, maxWidth: 280 }} type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="mot de passe HyperBetty" />
 
-      <label style={S.label}>URLs de courtiers (une par ligne, max 25)</label>
-      <textarea style={S.ta} value={urls} onChange={(e) => setUrls(e.target.value)} placeholder={"thegellmanteam.com\n54realty.com\nmoverealestate.org"} />
+      <label style={S.label}>{discover ? "Villes US (une par ligne) — HyperBetty trouve les courtiers tout seul" : "URLs de courtiers (une par ligne, max 25)"}</label>
+      <textarea style={S.ta} value={urls} onChange={(e) => setUrls(e.target.value)} placeholder={discover ? "Houston\nMiami\nDallas\nAustin" : "thegellmanteam.com\n54realty.com"} />
 
       <div style={{ ...S.row, marginTop: 16 }}>
         <div>
@@ -64,6 +66,10 @@ export default function HyperBetty() {
             <option value="site">Site simple ($1/mo)</option>
           </select>
         </div>
+        <label style={{ ...S.row, marginTop: 26, gap: 8, cursor: "pointer" }}>
+          <input type="checkbox" checked={discover} onChange={(e) => setDiscover(e.target.checked)} />
+          <span style={{ fontSize: 14 }}>🔎 Auto-trouver les courtiers (je saisis des villes)</span>
+        </label>
         <label style={{ ...S.row, marginTop: 26, gap: 8, cursor: "pointer" }}>
           <input type="checkbox" checked={dry} onChange={(e) => setDry(e.target.checked)} />
           <span style={{ fontSize: 14 }}>Aperçu seul (ne crée rien, n'envoie pas)</span>
