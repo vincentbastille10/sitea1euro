@@ -1,6 +1,17 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { markBotPaid } from "../../../lib/betty-bot";
+import { pingIndexNow } from "../../../lib/indexnow";
+
+// Note indexation Google : contrairement à une idée répandue, Google n'a PAS
+// d'API publique pour "pousser" une page business dans son index (son
+// Indexing API officielle est réservée aux offres d'emploi / live streams).
+// Le levier gratuit réel côté Google : vérifier spectramedia.online comme
+// "Domain property" dans Search Console (1 enregistrement DNS TXT, one-shot,
+// couvre TOUS les sous-domaines pour toujours) + le sitemap.xml (déjà généré,
+// voir app/sitemap.js) que Google recrawle régulièrement une fois la propriété
+// vérifiée. Ci-dessous : IndexNow (Bing + Yandex), qui lui a une vraie API de
+// push gratuite et fonctionne dès maintenant, sans étape manuelle.
 
 const stripeSecret = process.env.STRIPE_SECRET_KEY;
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -41,6 +52,12 @@ export async function POST(req) {
           status: "active",
         });
         console.log("[STRIPE WEBHOOK] Bot activé:", md.betty_public_id, "slug:", md.slug);
+
+        // Site désormais payé/officiel : on pousse son indexation (Bing/Yandex).
+        if (md.slug) {
+          const rootDomain = process.env.ROOT_DOMAIN || "spectramedia.online";
+          pingIndexNow(`https://${md.slug}.${rootDomain}/`);
+        }
       } catch (e) {
         console.error("[STRIPE WEBHOOK] Échec activation du bot:", e);
       }
