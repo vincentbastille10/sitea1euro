@@ -81,10 +81,15 @@ export async function POST(req) {
 
   await createSite(site);
 
-  // Envoi d'un mail récap à l'adresse du client
+  // Envoi d'un mail récap à l'adresse du client. On remonte le VRAI statut
+  // Mailjet dans la réponse : un site créé ne veut pas dire un email délivré.
+  let emailSent = false, emailError = null;
   try {
-    await sendSiteEmail(site);
+    const mailRes = await sendSiteEmail(site);
+    emailSent = mailRes?.ok === true;
+    if (!emailSent) emailError = mailRes?.error || `status ${mailRes?.status ?? "?"}`;
   } catch (e) {
+    emailError = String(e);
     console.error("Erreur envoi email site:", e);
   }
 
@@ -94,5 +99,7 @@ export async function POST(req) {
     slug,
     url: `https://${slug}.${rootDomain}`,   // URL publique (sous-domaine)
     path: `/s/${slug}`,                       // accès direct (fallback / preview)
+    email_sent: emailSent,                    // false = l'email n'est PAS parti
+    email_error: emailError,                  // détail si échec (ex. Mailjet 401)
   });
 }
