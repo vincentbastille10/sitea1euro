@@ -17,7 +17,11 @@ export async function POST(req) {
     betty_on,
     plan,
     lang,
+    brand_color,
   } = b || {};
+
+  // Couleur de marque du prospect (site « sur mesure ») : on ne garde qu'un hex valide.
+  const brandColorSafe = /^#[0-9a-fA-F]{6}$/.test(brand_color || "") ? brand_color : "";
 
   // Requis : métier, enseigne, ville, email (email = destinataire des leads).
   // adresse / téléphone sont optionnels (souvent absents des annuaires).
@@ -73,6 +77,7 @@ export async function POST(req) {
     email,
     betty_on: plan === "site+betty" && !!betty_on,
     betty_public_id: bettyPublicId,
+    brand_color: brandColorSafe,
     lang: langSafe,
     plan: plan || "site",
     hero_image_url: heroImageUrl,

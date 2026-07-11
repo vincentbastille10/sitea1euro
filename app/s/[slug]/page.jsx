@@ -80,6 +80,12 @@ export default async function Site({ params }) {
   const title = `${site.nom_enseigne} – ${metier?.label || site.metier} ${t.in} ${site.ville}`;
   const bg = site.hero_image_url || "";
 
+  // Site « sur mesure » : on reprend la couleur de marque du prospect pour les
+  // accents (barre haute, bouton, cadre Betty). Défaut = rose Spectra si inconnue.
+  const accent = /^#[0-9a-fA-F]{6}$/.test(site.brand_color || "") ? site.brand_color : "#b76e79";
+  const _l = [1, 3, 5].map((i) => parseInt(accent.slice(i, i + 2), 16));
+  const accentText = 0.299 * _l[0] + 0.587 * _l[1] + 0.114 * _l[2] > 150 ? "#1a1420" : "#ffffff";
+
   // public_id du bot Betty à embarquer : celui du site, sinon celui du métier.
   const bettyId = site.betty_public_id || metier?.betty_public_id || "";
   const bettyBase = process.env.NEXT_PUBLIC_BETTY_URL || "https://mybetty.online";
@@ -104,6 +110,7 @@ export default async function Site({ params }) {
         backgroundImage: bg ? `url(${bg})` : "linear-gradient(135deg,#111,#333)",
         backgroundSize: "cover",
         backgroundPosition: "center",
+        borderTop: `6px solid ${accent}`, // barre de marque du prospect
       }}
     >
       <script
@@ -188,7 +195,7 @@ export default async function Site({ params }) {
                     borderRadius: 16,
                     overflow: "hidden",
                     background: "rgba(0,0,0,.5)",
-                    border: "1px solid rgba(255,255,255,.1)",
+                    border: `2px solid ${accent}`,
                     height: 380,
                   }}
                 >
@@ -283,8 +290,8 @@ export default async function Site({ params }) {
                       borderRadius: 999,
                       border: "none",
                       padding: "8px 14px",
-                      background: "#ffde8b",
-                      color: "#222",
+                      background: accent,
+                      color: accentText,
                       fontWeight: 600,
                       cursor: "pointer",
                       alignSelf: "flex-start",
