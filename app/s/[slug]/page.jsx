@@ -1,4 +1,5 @@
 import { cache } from "react";
+import { notFound } from "next/navigation";
 import { getSiteBySlug } from "../../../lib/sites-db";
 import { getMetierById } from "../../../lib/metiers";
 
@@ -22,7 +23,7 @@ const SCHEMA_TYPE = {
 
 export async function generateMetadata({ params }) {
   const site = await getSite(params.slug);
-  if (!site) return { title: "Page introuvable" };
+  if (!site) return { title: "Page introuvable", robots: { index: false, follow: false } };
 
   const metier = getMetierById(site.metier);
   const lang = siteLang(site, metier);
@@ -60,7 +61,7 @@ export async function generateMetadata({ params }) {
 
 export default async function Site({ params }) {
   const site = await getSite(params.slug);
-  if (!site) return <h1>Page introuvable</h1>;
+  if (!site) notFound(); // vrai statut 404 + page not-found.js soignée
 
   const metier = getMetierById(site.metier);
   const lang = siteLang(site, metier);
