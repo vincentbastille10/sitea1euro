@@ -18,10 +18,13 @@ export async function POST(req) {
     plan,
     lang,
     brand_color,
+    prospect_image,
   } = b || {};
 
   // Couleur de marque du prospect (site « sur mesure ») : on ne garde qu'un hex valide.
   const brandColorSafe = /^#[0-9a-fA-F]{6}$/.test(brand_color || "") ? brand_color : "";
+  // Image du propre site du prospect (fond « sur mesure ») : URL http(s) seulement.
+  const prospectImageSafe = /^https?:\/\/.+/i.test(prospect_image || "") ? prospect_image : "";
 
   // Requis : métier, enseigne, ville, email (email = destinataire des leads).
   // adresse / téléphone sont optionnels (souvent absents des annuaires).
@@ -45,8 +48,10 @@ export async function POST(req) {
     ? lang
     : (getMetierById(metier)?.lang === "en" ? "en" : "fr");
 
-  // Génère une image de fond, dans la langue du site
-  const heroImageUrl = await generateHeroImageUrl(metier, nom_enseigne, ville, langSafe);
+  // Fond « sur mesure » : l'image du propre site du prospect si on l'a captée,
+  // sinon une image contextuelle générée selon le métier.
+  const heroImageUrl = prospectImageSafe
+    || await generateHeroImageUrl(metier, nom_enseigne, ville, langSafe);
 
   // Bot Betty INDIVIDUEL à ce prospect (pas le bot démo partagé) : mémoire de
   // conversation propre + leads captés envoyés à SON email. C'est ce bot qui

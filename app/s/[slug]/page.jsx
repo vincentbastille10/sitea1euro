@@ -226,15 +226,22 @@ export default async function Site({ params }) {
                 </div>
               )}
 
-              <div
-                style={{
-                  borderRadius: 16,
-                  background: "rgba(0,0,0,.65)",
-                  border: "1px solid rgba(255,255,255,.1)",
-                  padding: 16,
-                }}
-              >
-                <h2 style={{ fontSize: 18, marginBottom: 8 }}>{t.writeUs}</h2>
+              {/* Contact classique volontairement DISCRET (repliable) : Betty
+                  reste la voie principale ; un formulaire trop visible
+                  suggérerait qu'on peut se passer d'elle. */}
+              <details style={{ marginTop: 2 }}>
+                <summary
+                  style={{
+                    fontSize: 13,
+                    color: "rgba(255,255,255,.6)",
+                    cursor: "pointer",
+                    listStyle: "none",
+                    userSelect: "none",
+                    padding: "2px 0",
+                  }}
+                >
+                  ✉︎ {t.writeUs}
+                </summary>
                 <form
                   action={`/api/contact/${params.slug}`}
                   method="POST"
@@ -242,6 +249,7 @@ export default async function Site({ params }) {
                     display: "flex",
                     flexDirection: "column",
                     gap: 8,
+                    marginTop: 10,
                   }}
                 >
                   <input
@@ -300,7 +308,7 @@ export default async function Site({ params }) {
                     {t.send}
                   </button>
                 </form>
-              </div>
+              </details>
             </div>
           </section>
         </main>
