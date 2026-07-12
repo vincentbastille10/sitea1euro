@@ -1,7 +1,7 @@
 import { cache } from "react";
 import { notFound } from "next/navigation";
 import { getSiteBySlug } from "../../../lib/sites-db";
-import { getMetierById } from "../../../lib/metiers";
+import { getMetierById, isMalePack } from "../../../lib/metiers";
 
 // React cache() : une seule requête DB par rendu, partagée entre
 // generateMetadata() et le composant de page.
@@ -70,12 +70,16 @@ export default async function Site({ params }) {
   const act = site.metier_label || metier?.label || site.metier;
   const actLow = (act || "").toLowerCase();
   const en = lang === "en";
+  // Genre de l'assistant selon l'avatar du pack → accord FR cohérent (site + widget).
+  const male = isMalePack(metier?.pack);
+  const asstFr = male ? "l’assistant" : "l’assistante"; // « Parler à … »
+  const asstFrShort = male ? "assistant" : "assistante"; // « Votre …, à toute heure »
 
   const t = en
     ? {
         navContact: "Contact", navCta: "Talk to our assistant",
         heroEyebrow: `${act} · ${ville}`,
-        heroSub: `Attentive, professional service in ${ville} — with an assistant ready to answer you day and night.`,
+        heroSub: `Attentive, professional service in ${ville}, day and night.`,
         heroCta1: "Chat with our assistant", heroCta2: "Get in touch",
         aboutKicker: "About", aboutH: `Your ${actLow} in ${ville}`,
         aboutP: `${nom} puts genuine care and expertise at the service of its clients in ${ville}. From the first message to the finished result, every request is handled with attention, precision and reliability.`,
@@ -91,22 +95,22 @@ export default async function Site({ params }) {
         bettyActivating: "Your assistant is being activated.", poweredBy: "Powered by Spectra Media",
       }
     : {
-        navContact: "Contact", navCta: "Parler à l’assistante",
+        navContact: "Contact", navCta: `Parler à ${asstFr}`,
         heroEyebrow: `${act} · ${ville}`,
-        heroSub: `Un accompagnement attentif et professionnel à ${ville} — avec une assistante prête à vous répondre jour et nuit.`,
-        heroCta1: "Discuter avec l’assistante", heroCta2: "Nous contacter",
+        heroSub: `Un accompagnement attentif et professionnel à ${ville}.`,
+        heroCta1: `Discuter avec ${asstFr}`, heroCta2: "Nous contacter",
         aboutKicker: "À propos", aboutH: `Votre ${actLow} à ${ville}`,
         aboutP: `${nom} met son savoir-faire et son sens du détail au service de ses client·es à ${ville}. Du premier échange à la réalisation, chaque demande est traitée avec soin, exigence et fiabilité.`,
         featKicker: "Nos atouts", featH: "Pourquoi nous faire confiance",
-        f1H: "Disponible 24h/24", f1P: "Une question tard le soir ou le week-end ? Notre assistante vous répond immédiatement.",
+        f1H: "Disponible 24h/24", f1P: `Une question tard le soir ou le week-end ? Votre ${asstFrShort} vous répond immédiatement.`,
         f2H: `Ancré à ${ville}`, f2P: "Un service de proximité, personnel, à l’écoute de vos besoins.",
         f3H: "Sans délai", f3P: "Chaque demande est prise en compte tout de suite — aucune opportunité ne se perd.",
-        bettyH: "Votre assistante, à toute heure", bettyP: "Posez votre question, demandez un rendez-vous ou un devis — Betty vous répond aussitôt et transmet votre demande.",
+        bettyH: `Votre ${asstFrShort}, à toute heure`, bettyP: "Posez votre question, demandez un rendez-vous ou un devis — Betty vous répond aussitôt et transmet votre demande.",
         contactKicker: "Contact", contactH: "Prendre contact",
         address: "Adresse", phone: "Téléphone", email: "Email",
         writeUs: "Vous préférez écrire ? Laisser un message", yourName: "Votre nom", yourEmail: "Votre email",
         yourMessage: "Votre message", send: "Envoyer",
-        bettyActivating: "Assistante en cours d’activation.", poweredBy: "Propulsé par Spectra Media",
+        bettyActivating: `${male ? "Assistant" : "Assistante"} en cours d’activation.`, poweredBy: "Propulsé par Spectra Media",
       };
 
   const bg = site.hero_image_url || "";
