@@ -74,6 +74,8 @@ export async function POST(req) {
       name: nom_enseigne,
       metierLabel: metierLabelSafe || info?.label || metierId,
       lang: langSafe,
+      phone: telephoneSafe,
+      address: [adresseSafe, ville].filter(Boolean).join(", "),
     });
   } catch (e) {
     console.error("[BETTY BOT] création échouée, repli sur le bot démo:", e);
