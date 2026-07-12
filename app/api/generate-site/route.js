@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createSite } from "../../../lib/sites-db";
 import { generateHeroImageUrl } from "../../../lib/hero-image";
-import { sendSiteEmail } from "../../../lib/mail";
+import { sendSiteEmail, sendBettyOnlyEmail } from "../../../lib/mail";
 import { getMetierById } from "../../../lib/metiers";
 import { upsertProspectBot } from "../../../lib/betty-bot";
 
@@ -21,7 +21,11 @@ export async function POST(req) {
     prospect_image,
     metier_label,
     activity,
+    site_url,
   } = b || {};
+
+  // URL du site existant du prospect (offre B) : sert au crawl MyBetty + config.
+  const siteUrlSafe = /^https?:\/\/.+/i.test(site_url || "") ? site_url : "";
 
   // Activité détectée (texte libre) → HyperBetty s'adapte à N'IMPORTE quelle
   // activité, sans liste de métiers figée. Sert au libellé affiché + à l'image.
@@ -39,6 +43,7 @@ export async function POST(req) {
     return NextResponse.json({ error: "Champs manquants" }, { status: 400 });
   }
   const metierId = metier || "pro"; // id générique si activité libre sans métier connu
+  const bettyBase = process.env.NEXT_PUBLIC_BETTY_URL || "https://mybetty.online";
   const adresseSafe = adresse || "";
   const telephoneSafe = telephone || "";
 
@@ -76,6 +81,7 @@ export async function POST(req) {
       lang: langSafe,
       phone: telephoneSafe,
       address: [adresseSafe, ville].filter(Boolean).join(", "),
+      website: siteUrlSafe,
     });
   } catch (e) {
     console.error("[BETTY BOT] création échouée, repli sur le bot démo:", e);
@@ -90,10 +96,11 @@ export async function POST(req) {
     adresse: adresseSafe,
     telephone: telephoneSafe,
     email,
-    betty_on: plan === "site+betty" && !!betty_on,
+    betty_on: (plan === "site+betty" || plan === "betty") && !!betty_on,
     betty_public_id: bettyPublicId,
     brand_color: brandColorSafe,
     metier_label: metierLabelSafe, // libellé libre de l'activité détectée
+    site_url: siteUrlSafe,         // site existant du prospect (offre B)
     lang: langSafe,
     plan: plan || "site",
     hero_image_url: heroImageUrl,
@@ -102,16 +109,31 @@ export async function POST(req) {
 
   await createSite(site);
 
-  // Envoi d'un mail récap à l'adresse du client. On remonte le VRAI statut
-  // Mailjet dans la réponse : un site créé ne veut pas dire un email délivré.
+  // Offre B (le prospect a déjà un site) : on demande à MyBetty de crawler son
+  // site pour pré-remplir la Betty (scriptée sans LLM), prête à l'essai.
+  if (plan === "betty" && siteUrlSafe && bettyPublicId) {
+    try {
+      await fetch(`${bettyBase}/api/trigger_initial_crawl`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ public_id: bettyPublicId }),
+      });
+    } catch (e) {
+      console.error("[CRAWL] déclenchement échoué (non bloquant):", e);
+    }
+  }
+
+  // Email : offre B (Betty seule, site existant) → template dédié ; sinon offre A.
   let emailSent = false, emailError = null;
   try {
-    const mailRes = await sendSiteEmail(site);
+    const mailRes = plan === "betty"
+      ? await sendBettyOnlyEmail(site)
+      : await sendSiteEmail(site);
     emailSent = mailRes?.ok === true;
     if (!emailSent) emailError = mailRes?.error || `status ${mailRes?.status ?? "?"}`;
   } catch (e) {
     emailError = String(e);
-    console.error("Erreur envoi email site:", e);
+    console.error("Erreur envoi email:", e);
   }
 
   const rootDomain = process.env.ROOT_DOMAIN || "spectramedia.online";
