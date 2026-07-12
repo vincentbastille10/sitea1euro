@@ -19,18 +19,26 @@ export async function POST(req) {
     lang,
     brand_color,
     prospect_image,
+    metier_label,
+    activity,
   } = b || {};
+
+  // Activité détectée (texte libre) → HyperBetty s'adapte à N'IMPORTE quelle
+  // activité, sans liste de métiers figée. Sert au libellé affiché + à l'image.
+  const activitySafe = (activity || metier_label || "").toString().slice(0, 60).trim();
+  const metierLabelSafe = (metier_label || activity || "").toString().slice(0, 60).trim();
 
   // Couleur de marque du prospect (site « sur mesure ») : on ne garde qu'un hex valide.
   const brandColorSafe = /^#[0-9a-fA-F]{6}$/.test(brand_color || "") ? brand_color : "";
   // Image du propre site du prospect (fond « sur mesure ») : URL http(s) seulement.
   const prospectImageSafe = /^https?:\/\/.+/i.test(prospect_image || "") ? prospect_image : "";
 
-  // Requis : métier, enseigne, ville, email (email = destinataire des leads).
-  // adresse / téléphone sont optionnels (souvent absents des annuaires).
-  if (!metier || !nom_enseigne || !ville || !email) {
+  // Requis : enseigne, ville, email, ET au moins une activité (métier connu OU
+  // libellé libre) — HyperBetty s'adapte à n'importe quelle activité.
+  if (!nom_enseigne || !ville || !email || (!metier && !metierLabelSafe)) {
     return NextResponse.json({ error: "Champs manquants" }, { status: 400 });
   }
+  const metierId = metier || "pro"; // id générique si activité libre sans métier connu
   const adresseSafe = adresse || "";
   const telephoneSafe = telephone || "";
 
@@ -46,25 +54,25 @@ export async function POST(req) {
   // langue explicite (déduite de la ville/région ciblée) prioritaire sur celle du métier
   const langSafe = (lang === "en" || lang === "fr")
     ? lang
-    : (getMetierById(metier)?.lang === "en" ? "en" : "fr");
+    : (getMetierById(metierId)?.lang === "en" ? "en" : "fr");
 
   // Fond « sur mesure » : l'image du propre site du prospect si on l'a captée,
-  // sinon une image contextuelle générée selon le métier.
+  // sinon une image contextuelle générée d'après l'activité détectée (générique).
   const heroImageUrl = prospectImageSafe
-    || await generateHeroImageUrl(metier, nom_enseigne, ville, langSafe);
+    || await generateHeroImageUrl(metierId, nom_enseigne, ville, langSafe, activitySafe);
 
   // Bot Betty INDIVIDUEL à ce prospect (pas le bot démo partagé) : mémoire de
   // conversation propre + leads captés envoyés à SON email. C'est ce bot qui
   // est embarqué sur son site.
   let bettyPublicId = "";
-  const info = getMetierById(metier);
+  const info = getMetierById(metierId);
   try {
     bettyPublicId = await upsertProspectBot({
       email,
       pack: info?.pack || "betty_neutre_001",
-      botKey: metier,
+      botKey: metierId,
       name: nom_enseigne,
-      metierLabel: info?.label || metier,
+      metierLabel: metierLabelSafe || info?.label || metierId,
       lang: langSafe,
     });
   } catch (e) {
@@ -74,7 +82,7 @@ export async function POST(req) {
 
   const site = {
     slug,
-    metier,
+    metier: metierId,
     nom_enseigne,
     ville,
     adresse: adresseSafe,
@@ -83,6 +91,7 @@ export async function POST(req) {
     betty_on: plan === "site+betty" && !!betty_on,
     betty_public_id: bettyPublicId,
     brand_color: brandColorSafe,
+    metier_label: metierLabelSafe, // libellé libre de l'activité détectée
     lang: langSafe,
     plan: plan || "site",
     hero_image_url: heroImageUrl,

@@ -28,7 +28,7 @@ export async function generateMetadata({ params }) {
   const metier = getMetierById(site.metier);
   const lang = siteLang(site, metier);
   const inWord = lang === "en" ? "in" : "à";
-  const title = `${site.nom_enseigne} – ${metier?.label || site.metier} ${inWord} ${site.ville}`;
+  const title = `${site.nom_enseigne} – ${site.metier_label || metier?.label || site.metier} ${inWord} ${site.ville}`;
   const description = (
     metier?.pitch ||
     (lang === "en" ? "Professional service, by appointment." : "Accompagnement professionnel, sur rendez-vous.")
@@ -77,7 +77,7 @@ export default async function Site({ params }) {
         defaultPitch: "Accompagnement professionnel, sur rendez-vous, avec une approche personnalisée.",
         bettyActivating: "Assistant Betty en cours d’activation pour ce métier." };
 
-  const title = `${site.nom_enseigne} – ${metier?.label || site.metier} ${t.in} ${site.ville}`;
+  const title = `${site.nom_enseigne} – ${site.metier_label || metier?.label || site.metier} ${t.in} ${site.ville}`;
   const bg = site.hero_image_url || "";
 
   // Site « sur mesure » : on reprend la couleur de marque du prospect pour les
