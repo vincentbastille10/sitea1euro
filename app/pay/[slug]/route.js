@@ -7,8 +7,6 @@ import Stripe from "stripe";
 import { getSiteBySlug } from "../../../lib/sites-db";
 
 const stripeSecret = process.env.STRIPE_SECRET_KEY;
-const priceSite = process.env.STRIPE_PRICE_SITE;
-const priceSiteBetty = process.env.STRIPE_PRICE_SITE_BETTY;
 const stripe = stripeSecret ? new Stripe(stripeSecret, { apiVersion: "2024-04-10" }) : null;
 
 export async function GET(req, { params }) {
@@ -19,14 +17,32 @@ export async function GET(req, { params }) {
   if (!site) return NextResponse.redirect(siteUrl);
   if (!stripe) return new NextResponse("Paiement indisponible (Stripe non configuré).", { status: 500 });
 
-  const priceId = site.plan === "site+betty" ? priceSiteBetty : priceSite;
-  if (!priceId) return new NextResponse("Paiement indisponible (prix non configuré).", { status: 500 });
+  // Prix construit À LA VOLÉE (price_data) plutôt qu'un Price Stripe figé :
+  // libellé propre, aucun logo, et devise selon la langue de la cible.
+  //   • email français   → 59 €/mois
+  //   • email US/UK (en) → 59 $/mois
+  const isBetty = site.plan === "site+betty";
+  const fr = site.lang !== "en"; // défaut FR ; en = US/UK
+  const currency = fr ? "eur" : "usd";
+  const unit_amount = isBetty ? 5900 : 100; // 59.00 (site+Betty) ; 1.00 (site seul)
+  const productName = isBetty
+    ? (fr ? "1 site sur mesure + un MyBetty" : "1 custom website + one MyBetty")
+    : (fr ? "1 site sur mesure" : "1 custom website");
 
   try {
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       payment_method_types: ["card"],
-      line_items: [{ price: priceId, quantity: 1 }],
+      line_items: [{
+        quantity: 1,
+        price_data: {
+          currency,
+          unit_amount,
+          recurring: { interval: "month" },
+          // product_data SANS `images` → aucun logo sur le checkout
+          product_data: { name: productName },
+        },
+      }],
       customer_email: site.email,
       metadata: {
         slug: site.slug,
