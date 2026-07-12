@@ -44,6 +44,9 @@ export async function GET(req, { params }) {
         },
       }],
       customer_email: site.email,
+      // Essai gratuit 14 jours : lève la barrière du 1er paiement (conversion
+      // cold ×2-3). Ils confirment leur carte, paient 0€ maintenant, 59€ après.
+      subscription_data: { trial_period_days: 14 },
       metadata: {
         slug: site.slug,
         betty_public_id: site.betty_public_id || "",
