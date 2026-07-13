@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
-import { markBotPaid } from "../../../lib/betty-bot";
+import { markBotPaid, markBotUnpaid } from "../../../lib/betty-bot";
+import { markSiteActive, markSiteSuspended } from "../../../lib/sites-db";
 import { pingIndexNow } from "../../../lib/indexnow";
 
 // Note indexation Google : contrairement à une idée répandue, Google n'a PAS
@@ -20,9 +21,8 @@ const stripe = stripeSecret ? new Stripe(stripeSecret, { apiVersion: "2024-04-10
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-// Le site (démo) existe déjà AVANT paiement (créé par /api/generate-site).
-// Ce webhook ne fait qu'ACTIVER le bot Betty du prospect (paid=1) une fois
-// l'abonnement Stripe confirmé — il ne recrée rien.
+// Le site (aperçu) existe déjà AVANT paiement. Le webhook réactive exactement
+// le même site et son MyBetty : aucune reconstruction, aucune perte de données.
 export async function POST(req) {
   if (!stripe || !webhookSecret) {
     console.error("[STRIPE WEBHOOK] Clés manquantes");
@@ -40,32 +40,63 @@ export async function POST(req) {
     return new NextResponse(`Webhook Error: ${err.message}`, { status: 400 });
   }
 
-  if (event.type === "checkout.session.completed") {
-    const session = event.data.object;
-    const md = session.metadata || {};
+  try {
+    if (event.type === "checkout.session.completed") {
+      const session = event.data.object;
+      const md = session.metadata || {};
+      if (!md.slug) throw new Error("slug absent des metadata Checkout");
 
-    if (md.betty_public_id) {
-      try {
+      const siteActivated = await markSiteActive(md.slug, {
+        customerId: session.customer,
+        subscriptionId: session.subscription,
+      });
+      if (!siteActivated) throw new Error(`site introuvable: ${md.slug}`);
+
+      if (md.betty_public_id) {
         await markBotPaid(md.betty_public_id, {
           customerId: session.customer,
           subscriptionId: session.subscription,
-          status: "active",
+          status: "trialing",
         });
-        console.log("[STRIPE WEBHOOK] Bot activé:", md.betty_public_id, "slug:", md.slug);
+      }
 
-        // Site désormais payé/officiel : on pousse son indexation (Bing/Yandex).
-        if (md.slug) {
-          const rootDomain = process.env.ROOT_DOMAIN || "spectramedia.online";
-          pingIndexNow(`https://${md.slug}.${rootDomain}/`);
+      console.log("[STRIPE WEBHOOK] Site et bot activés, slug:", md.slug);
+      const rootDomain = process.env.ROOT_DOMAIN || "spectramedia.online";
+      pingIndexNow(`https://${md.slug}.${rootDomain}/`);
+    } else if (event.type === "customer.subscription.updated"
+      || event.type === "customer.subscription.deleted") {
+      const subscription = event.data.object;
+      const md = subscription.metadata || {};
+      const inactive = event.type === "customer.subscription.deleted"
+        || ["canceled", "unpaid", "incomplete_expired"].includes(subscription.status);
+
+      if (!md.slug) {
+        console.warn("[STRIPE WEBHOOK] Abonnement sans slug, ignoré:", subscription.id);
+      } else if (inactive) {
+        await markSiteSuspended(md.slug);
+        if (md.betty_public_id) await markBotUnpaid(md.betty_public_id, subscription.status || "canceled");
+        console.log("[STRIPE WEBHOOK] Site suspendu, slug:", md.slug);
+      } else if (["active", "trialing", "past_due"].includes(subscription.status)) {
+        await markSiteActive(md.slug, {
+          customerId: subscription.customer,
+          subscriptionId: subscription.id,
+        });
+        if (md.betty_public_id) {
+          await markBotPaid(md.betty_public_id, {
+            customerId: subscription.customer,
+            subscriptionId: subscription.id,
+            status: subscription.status,
+          });
         }
-      } catch (e) {
-        console.error("[STRIPE WEBHOOK] Échec activation du bot:", e);
       }
     } else {
-      console.warn("[STRIPE WEBHOOK] Pas de betty_public_id dans les metadata:", md);
+      console.log("[STRIPE WEBHOOK] Event ignoré:", event.type);
     }
-  } else {
-    console.log("[STRIPE WEBHOOK] Event ignoré:", event.type);
+  } catch (e) {
+    // Un 500 demande à Stripe de retenter l'évènement : on ne perd pas une
+    // activation si la base a eu une panne passagère.
+    console.error("[STRIPE WEBHOOK] Traitement échoué:", e);
+    return new NextResponse("Traitement du webhook échoué", { status: 500 });
   }
 
   return NextResponse.json({ received: true }, { status: 200 });

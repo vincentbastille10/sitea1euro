@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
-import { createSite } from "../../../lib/sites-db";
+import { createSite, getSiteBySlug } from "../../../lib/sites-db";
 import { generateHeroImageUrl } from "../../../lib/hero-image";
 import { sendSiteEmail, sendBettyOnlyEmail } from "../../../lib/mail";
 import { getMetierById } from "../../../lib/metiers";
 import { upsertProspectBot } from "../../../lib/betty-bot";
+import { PREVIEW_MS, getSiteState } from "../../../lib/site-access";
 
 export async function POST(req) {
   const b = await req.json();
@@ -56,6 +57,14 @@ export async function POST(req) {
     .slice(0, 63)              // limite d'un label DNS (sous-domaine)
     .replace(/-$/, "") || "site";
 
+  // Une nouvelle génération du même prospect met son contenu à jour, mais ne
+  // remet jamais à zéro les 7 jours et ne désactive jamais un client payé.
+  const existingSite = await getSiteBySlug(slug);
+  const existingState = getSiteState(existingSite);
+  const createdAt = existingSite?.created_at || new Date().toISOString();
+  const previewExpiresAt = existingSite?.preview_expires_at
+    || new Date(Date.parse(createdAt) + PREVIEW_MS).toISOString();
+
   // langue explicite (déduite de la ville/région ciblée) prioritaire sur celle du métier
   const langSafe = (lang === "en" || lang === "fr")
     ? lang
@@ -104,7 +113,13 @@ export async function POST(req) {
     lang: langSafe,
     plan: plan || "site",
     hero_image_url: heroImageUrl,
-    created_at: new Date().toISOString(),
+    created_at: createdAt,
+    preview_expires_at: previewExpiresAt,
+    status: existingState.status === "active" ? "active" : (existingSite?.status || "preview"),
+    paid: existingState.status === "active",
+    ...(existingSite?.activated_at ? { activated_at: existingSite.activated_at } : {}),
+    ...(existingSite?.stripe_customer_id ? { stripe_customer_id: existingSite.stripe_customer_id } : {}),
+    ...(existingSite?.stripe_subscription_id ? { stripe_subscription_id: existingSite.stripe_subscription_id } : {}),
   };
 
   await createSite(site);

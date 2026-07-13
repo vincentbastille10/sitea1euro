@@ -4,6 +4,7 @@
 // suffisant pour une "Domain property" Google Search Console (couvre tous les
 // sous-domaines dès qu'elle est vérifiée une fois sur spectramedia.online).
 import { listSites } from "../lib/sites-db";
+import { getSiteState } from "../lib/site-access";
 
 // Dynamique (pas figé au build) : chaque nouveau site généré doit apparaître
 // sans attendre un redéploiement.
@@ -18,7 +19,8 @@ export default async function sitemap() {
     console.error("[SITEMAP] listSites a échoué:", e);
   }
   return sites
-    .filter((s) => s.slug)
+    // Seuls les sites payés/officiels sont proposés aux moteurs de recherche.
+    .filter((s) => s.slug && getSiteState(s).status === "active")
     .map((s) => ({
       url: `https://${s.slug}.${rootDomain}/`,
       lastModified: s.updated_at || s.created_at || new Date(),

@@ -2,6 +2,7 @@ import { cache } from "react";
 import { notFound } from "next/navigation";
 import { getSiteBySlug } from "../../../lib/sites-db";
 import { getMetierById, isMalePack } from "../../../lib/metiers";
+import { getSiteState } from "../../../lib/site-access";
 
 // React cache() : une seule requête DB par rendu, partagée entre
 // generateMetadata() et le composant de page.
@@ -27,6 +28,13 @@ export async function generateMetadata({ params }) {
 
   const metier = getMetierById(site.metier);
   const lang = siteLang(site, metier);
+  const state = getSiteState(site);
+  if (!state.accessible) {
+    return {
+      title: lang === "en" ? "Preview expired" : "Aperçu expiré",
+      robots: { index: false, follow: false },
+    };
+  }
   const inWord = lang === "en" ? "in" : "à";
   const title = `${site.nom_enseigne} – ${site.metier_label || metier?.label || site.metier} ${inWord} ${site.ville}`;
   const description = (
@@ -40,7 +48,9 @@ export async function generateMetadata({ params }) {
     title,
     description,
     alternates: { canonical: url },
-    robots: { index: true, follow: true },
+    // Les aperçus commerciaux restent privés des moteurs. Le site devient
+    // indexable automatiquement dès la confirmation Stripe.
+    robots: { index: state.status === "active", follow: state.status === "active" },
     openGraph: {
       title,
       description,
@@ -67,6 +77,10 @@ export default async function Site({ params }) {
   const lang = siteLang(site, metier);
   const nom = site.nom_enseigne;
   const ville = site.ville;
+  const state = getSiteState(site);
+  if (!state.accessible) {
+    return <ExpiredSite site={site} lang={lang} suspended={state.status === "suspended"} />;
+  }
   const act = site.metier_label || metier?.label || site.metier;
   const actLow = (act || "").toLowerCase();
   const en = lang === "en";
@@ -262,6 +276,37 @@ export default async function Site({ params }) {
         </div>
       </footer>
     </div>
+  );
+}
+
+function ExpiredSite({ site, lang, suspended }) {
+  const en = lang === "en";
+  const rootDomain = process.env.ROOT_DOMAIN || "spectramedia.online";
+  const payUrl = `https://${site.slug}.${rootDomain}/pay`;
+  const copy = en ? {
+    eyebrow: suspended ? "Subscription inactive" : "7-day preview ended",
+    title: suspended ? "This website is temporarily unavailable" : "This preview has expired",
+    text: `The personalized website created for ${site.nom_enseigne} has been safely kept. Start the subscription to immediately restore this exact website, its human-faced MyBetty receptionist and its contact form.`,
+    cta: "Reactivate this website",
+    note: "No rebuilding and no data loss.",
+  } : {
+    eyebrow: suspended ? "Abonnement inactif" : "Aperçu de 7 jours terminé",
+    title: suspended ? "Ce site est temporairement indisponible" : "Cet aperçu a expiré",
+    text: `Le site personnalisé créé pour ${site.nom_enseigne} a été conservé. Activez l’abonnement pour remettre immédiatement en ligne ce même site, sa réceptionniste MyBetty à visage humain et son formulaire de contact.`,
+    cta: "Réactiver ce site",
+    note: "Aucune reconstruction et aucune donnée perdue.",
+  };
+
+  return (
+    <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 24, background: "#f6f1ea", fontFamily: "-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif", color: "#2a2320" }}>
+      <section style={{ width: "100%", maxWidth: 620, padding: "44px 34px", background: "#fff", borderRadius: 22, textAlign: "center", boxShadow: "0 18px 60px rgba(80,50,60,.12)" }}>
+        <div style={{ color: "#b76e79", fontSize: 13, fontWeight: 800, letterSpacing: ".12em", textTransform: "uppercase" }}>{copy.eyebrow}</div>
+        <h1 style={{ margin: "12px 0 16px", fontSize: "clamp(30px,6vw,46px)", lineHeight: 1.08 }}>{copy.title}</h1>
+        <p style={{ margin: "0 auto 26px", maxWidth: 510, color: "#665a60", fontSize: 17, lineHeight: 1.65 }}>{copy.text}</p>
+        <a href={payUrl} style={{ display: "inline-block", padding: "14px 28px", borderRadius: 999, background: "#b76e79", color: "#fff", fontWeight: 800, textDecoration: "none" }}>{copy.cta}</a>
+        <p style={{ margin: "16px 0 0", color: "#9a8d94", fontSize: 13 }}>{copy.note}</p>
+      </section>
+    </main>
   );
 }
 

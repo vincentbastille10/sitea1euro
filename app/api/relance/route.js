@@ -6,6 +6,8 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { listSites, createSite } from "../../../lib/sites-db";
 import { sendFollowupEmail } from "../../../lib/mail";
+import { blockUnpaidBot } from "../../../lib/betty-bot";
+import { getSiteState } from "../../../lib/site-access";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -53,7 +55,16 @@ export async function GET(req) {
   const [sites, paid] = await Promise.all([listSites(5000), paidEmails()]);
   let sent = 0, skippedPaid = 0, failed = 0;
   for (const s of sites) {
-    if (sent >= limit) break;
+    const access = getSiteState(s, now);
+    if (access.status === "expired") {
+      // Double verrouillage : le site et le formulaire sont déjà coupés côté
+      // Next.js ; le cron bloque aussi l'accès direct à l'ancien chat MyBetty.
+      try { await blockUnpaidBot(s.betty_public_id); }
+      catch (e) { console.error("[RELANCE] blocage Betty:", e); }
+      continue;
+    }
+    if (access.status === "active" || access.status === "suspended") continue;
+    if (sent >= limit) continue;
     if (!s.email || !s.betty_on || String(s.email).includes("example.com")) continue;
     const created = Date.parse(s.created_at || 0) || 0;
     const ageDays = (now - created) / DAY;

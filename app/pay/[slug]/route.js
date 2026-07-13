@@ -5,6 +5,7 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { getSiteBySlug } from "../../../lib/sites-db";
+import { getSiteState } from "../../../lib/site-access";
 
 const stripeSecret = process.env.STRIPE_SECRET_KEY;
 const stripe = stripeSecret ? new Stripe(stripeSecret, { apiVersion: "2024-04-10" }) : null;
@@ -15,6 +16,8 @@ export async function GET(req, { params }) {
 
   const site = await getSiteBySlug(params.slug);
   if (!site) return NextResponse.redirect(siteUrl);
+  // Évite qu'un client déjà actif crée accidentellement un second abonnement.
+  if (getSiteState(site).status === "active") return NextResponse.redirect(siteUrl);
   if (!stripe) return new NextResponse("Paiement indisponible (Stripe non configuré).", { status: 500 });
 
   // Prix construit À LA VOLÉE (price_data) plutôt qu'un Price Stripe figé :
@@ -46,7 +49,16 @@ export async function GET(req, { params }) {
       customer_email: site.email,
       // Essai gratuit 7 jours : lève la barrière du 1er paiement (conversion
       // cold ×2-3). 0€ maintenant, 59€ après 7 jours.
-      subscription_data: { trial_period_days: 7 },
+      subscription_data: {
+        trial_period_days: 7,
+        // Les mêmes identifiants restent attachés à l'abonnement. Le webhook
+        // peut ainsi suspendre le bon site si l'abonnement est résilié.
+        metadata: {
+          slug: site.slug,
+          betty_public_id: site.betty_public_id || "",
+          plan: site.plan || "site",
+        },
+      },
       metadata: {
         slug: site.slug,
         betty_public_id: site.betty_public_id || "",

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSiteBySlug } from "../../../../lib/sites-db";
+import { getSiteState } from "../../../../lib/site-access";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -20,6 +21,15 @@ export async function POST(req, { params }) {
       return NextResponse.json(
         { ok: false, error: "Site introuvable." },
         { status: 404 }
+      );
+    }
+
+    // La page expirée ne montre plus le formulaire, mais cette vérification
+    // serveur empêche aussi un envoi direct vers l'ancienne URL de l'API.
+    if (!getSiteState(site).accessible) {
+      return NextResponse.json(
+        { ok: false, error: "Cet aperçu a expiré. Le formulaire est désactivé." },
+        { status: 410 }
       );
     }
 
