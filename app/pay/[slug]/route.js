@@ -13,6 +13,9 @@ const stripe = stripeSecret ? new Stripe(stripeSecret, { apiVersion: "2024-04-10
 export async function GET(req, { params }) {
   const rootDomain = process.env.ROOT_DOMAIN || "spectramedia.online";
   const siteUrl = `https://${params.slug}.${rootDomain}`;
+  const billing = new URL(req.url).searchParams.get("billing") === "annual"
+    ? "annual"
+    : "monthly";
 
   const site = await getSiteBySlug(params.slug);
   if (!site) return NextResponse.redirect(siteUrl);
@@ -27,10 +30,17 @@ export async function GET(req, { params }) {
   const isBetty = site.plan === "site+betty";
   const fr = site.lang !== "en"; // défaut FR ; en = US/UK
   const currency = fr ? "eur" : "usd";
-  const unit_amount = isBetty ? 5900 : 100; // 59.00 (site+Betty) ; 1.00 (site seul)
-  const productName = isBetty
+  const annual = billing === "annual";
+  // Annuel = 12 mensualités avec 20 % de remise.
+  const unit_amount = isBetty
+    ? (annual ? 56640 : 5900)
+    : (annual ? 960 : 100);
+  const baseProductName = isBetty
     ? (fr ? "1 site sur mesure + un MyBetty" : "1 custom website + one MyBetty")
     : (fr ? "1 site sur mesure" : "1 custom website");
+  const productName = annual
+    ? `${baseProductName}${fr ? " — abonnement annuel" : " — annual subscription"}`
+    : `${baseProductName}${fr ? " — abonnement mensuel" : " — monthly subscription"}`;
 
   try {
     const session = await stripe.checkout.sessions.create({
@@ -41,7 +51,7 @@ export async function GET(req, { params }) {
         price_data: {
           currency,
           unit_amount,
-          recurring: { interval: "month" },
+          recurring: { interval: annual ? "year" : "month" },
           // product_data SANS `images` → aucun logo sur le checkout
           product_data: { name: productName },
         },
@@ -57,12 +67,14 @@ export async function GET(req, { params }) {
           slug: site.slug,
           betty_public_id: site.betty_public_id || "",
           plan: site.plan || "site",
+          billing,
         },
       },
       metadata: {
         slug: site.slug,
         betty_public_id: site.betty_public_id || "",
         plan: site.plan || "site",
+        billing,
       },
       success_url: `${siteUrl}/merci?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: siteUrl,
