@@ -111,7 +111,7 @@ export async function POST(req) {
 
   // Offre B (le prospect a déjà un site) : on demande à MyBetty de crawler son
   // site pour pré-remplir la Betty (scriptée sans LLM), prête à l'essai.
-  if (plan === "betty" && siteUrlSafe && bettyPublicId) {
+  if (siteUrlSafe && bettyPublicId) {
     try {
       await fetch(`${bettyBase}/api/trigger_initial_crawl`, {
         method: "POST",
