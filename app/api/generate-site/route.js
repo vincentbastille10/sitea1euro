@@ -73,7 +73,7 @@ export async function POST(req) {
   // Fond « sur mesure » : l'image du propre site du prospect si on l'a captée,
   // sinon une image contextuelle générée d'après l'activité détectée (générique).
   const heroImageUrl = prospectImageSafe
-    || await generateHeroImageUrl(metierId, nom_enseigne, ville, langSafe, activitySafe);
+    || await generateHeroImageUrl(metierId, nom_enseigne, ville, langSafe, activitySafe, brandColorSafe);
 
   // Bot Betty INDIVIDUEL à ce prospect (pas le bot démo partagé) : mémoire de
   // conversation propre + leads captés envoyés à SON email. C'est ce bot qui
