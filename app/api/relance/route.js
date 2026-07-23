@@ -8,6 +8,7 @@ import { listSites, createSite } from "../../../lib/sites-db";
 import { sendFollowupEmail } from "../../../lib/mail";
 import { blockUnpaidBot } from "../../../lib/betty-bot";
 import { getSiteState } from "../../../lib/site-access";
+import { isUnsubscribed } from "../../../lib/unsubscribes-db";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -74,6 +75,7 @@ export async function GET(req) {
     const lastTouch = Date.parse(s.last_touch || s.created_at || 0) || created;
     if ((now - lastTouch) / DAY < 3) continue;             // ≥ 3 j depuis le dernier
     if (paid.has(String(s.email).toLowerCase())) { skippedPaid++; continue; }
+    if (await isUnsubscribed(s.email)) continue;
 
     const res = await sendFollowupEmail(s, touches + 1);
     if (res?.ok) {
