@@ -1,3 +1,4 @@
+import { mgSend } from "../../../../lib/mailgun.js";
 import { NextResponse } from "next/server";
 import { getSiteBySlug } from "../../../../lib/sites-db";
 import { getSiteState } from "../../../../lib/site-access";
@@ -46,19 +47,9 @@ export async function POST(req, { params }) {
     }
 
     // ===== Mailjet direct =====
-    const mjKey = process.env.MJ_API_KEY;
-    const mjSecret = process.env.MJ_API_SECRET;
-    const fromEmail =
+            const fromEmail =
       process.env.MJ_SENDER_EMAIL || "spectramediabots@gmail.com";
     const fromName = process.env.MJ_SENDER_NAME || "Spectra Media";
-
-    if (!mjKey || !mjSecret) {
-      console.error("[MAILJET] Clés MJ_API_KEY/MJ_API_SECRET manquantes.");
-      return NextResponse.json(
-        { ok: false, error: "Service email indisponible." },
-        { status: 500 }
-      );
-    }
 
     const dest = site.email; // email de l’acheteur
     if (!dest) {
@@ -69,8 +60,6 @@ export async function POST(req, { params }) {
       );
     }
 
-    const auth = Buffer.from(`${mjKey}:${mjSecret}`).toString("base64");
-
     const html = `
       <h2>Nouveau message reçu depuis votre site</h2>
       <p><strong>Nom :</strong> ${name}</p>
@@ -78,28 +67,13 @@ export async function POST(req, { params }) {
       <p><strong>Message :</strong><br>${message.replace(/\n/g, "<br>")}</p>
     `;
 
-    const resMail = await fetch("https://api.mailjet.com/v3.1/send", {
-      method: "POST",
-      headers: {
-        Authorization: `Basic ${auth}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        Messages: [
-          {
-            From: { Email: fromEmail, Name: fromName },
-            To: [{ Email: dest }],
-            Subject: "Nouveau message reçu depuis votre site",
-            HTMLPart: html,
-            TextPart: `Nom: ${name}\nEmail: ${email}\n\n${message}`,
-          },
-        ],
-      }),
+    const resMail = await mgSend({
+      to: dest, subject: "Nouveau message reçu depuis votre site", html,
+      text: `Nom: ${name}\nEmail: ${email}\n\n${message}`, fromName,
     });
 
     if (!resMail.ok) {
-      const errTxt = await resMail.text();
-      console.error("[MAILJET] Erreur HTTP:", resMail.status, errTxt);
+      console.error("[MAILGUN] Erreur:", resMail.status, resMail.error);
       return NextResponse.json(
         { ok: false, error: "Erreur lors de l'envoi de l'email." },
         { status: 500 }
