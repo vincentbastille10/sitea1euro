@@ -144,7 +144,9 @@ export default async function Site({ params }) {
   } catch {}
 
   // Site « sur mesure » : couleur de marque du prospect en accent (défaut rose Spectra).
-  const accent = /^#[0-9a-fA-F]{6}$/.test(site.brand_color || "") ? site.brand_color : "#b76e79";
+  const sc = site.scrape || {};
+  const accent = /^#[0-9a-fA-F]{6}$/.test(site.brand_color || "") ? site.brand_color
+    : /^#[0-9a-fA-F]{6}$/.test(sc.color || "") ? sc.color : "#b76e79";
   const _l = [1, 3, 5].map((i) => parseInt(accent.slice(i, i + 2), 16));
   const accentText = 0.299 * _l[0] + 0.587 * _l[1] + 0.114 * _l[2] > 150 ? "#1a1420" : "#ffffff";
 
@@ -185,7 +187,7 @@ export default async function Site({ params }) {
 
       <header className="sm-header">
         <div className="in">
-          <div className="sm-brand">{nom}</div>
+          <div className="sm-brand">{sc.logo ? <img src={sc.logo} alt={nom} className="sm-logo" /> : nom}</div>
           <nav className="sm-nav">
             <a className="link" href="#apropos">{t.aboutKicker}</a>
             <a className="link" href="#contact">{t.navContact}</a>
@@ -201,7 +203,7 @@ export default async function Site({ params }) {
         <div className="in">
           <span className="sm-eyebrow">{t.heroEyebrow}</span>
           <h1>{nom}</h1>
-          <p className="sub">{t.heroSub}</p>
+          <p className="sub">{sc.tagline ? sc.tagline.replace(/\.(?=[A-Z])/g, ". ") : t.heroSub}</p>
           <div className="sm-cta">
             <a className="sm-btn" href="#betty">{t.heroCta1}</a>
             <a className="sm-btn ghost" href="#contact">{t.heroCta2}</a>
@@ -213,20 +215,30 @@ export default async function Site({ params }) {
       <section className="sm-sec" id="apropos">
         <div className="sm-kicker">{t.aboutKicker}</div>
         <h2 className="sm-h2">{t.aboutH}</h2>
-        <p className="sm-lead">{t.aboutP}</p>
+        <p className="sm-lead">{sc.about || t.aboutP}</p>
       </section>
+
+      {Array.isArray(sc.photos) && sc.photos.length >= 2 && (
+        <section className="sm-sec" style={{ paddingTop: 0 }}>
+          <div className="sm-gal">{sc.photos.slice(0, 4).map((u, i) => <img key={i} src={u} alt={nom} loading="lazy" />)}</div>
+        </section>
+      )}
 
       {/* ATOUTS */}
       <section className="sm-sec" style={{ paddingTop: 0 }}>
         <div className="sm-kicker">{t.featKicker}</div>
         <h2 className="sm-h2">{t.featH}</h2>
         <div className="sm-grid3">
-          {[[IC.clock, t.f1H, t.f1P], [IC.pin, t.f2H, t.f2P], [IC.bolt, t.f3H, t.f3P]].map(([d, h, p], i) => (
-            <div className="sm-card" key={i}>
-              <div className="sm-ic"><Icon d={d} /></div>
-              <h3>{h}</h3><p>{p}</p>
-            </div>
-          ))}
+          {Array.isArray(sc.services) && sc.services.length >= 3
+            ? sc.services.slice(0, 6).map((h, i) => (
+                <div className="sm-card" key={i}><div className="sm-ic"><Icon d={IC.bolt} /></div><h3>{h}</h3></div>
+              ))
+            : [[IC.clock, t.f1H, t.f1P], [IC.pin, t.f2H, t.f2P], [IC.bolt, t.f3H, t.f3P]].map(([d, h, p], i) => (
+                <div className="sm-card" key={i}>
+                  <div className="sm-ic"><Icon d={d} /></div>
+                  <h3>{h}</h3><p>{p}</p>
+                </div>
+              ))}
         </div>
       </section>
 
@@ -338,10 +350,13 @@ const SM_CSS = `
 .sm-btn.ghost{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.65)}
 .sm-hero{position:relative;min-height:82vh;display:flex;align-items:center;color:#fff}
 .sm-hero .bgimg{position:absolute;inset:0;background-size:cover;background-position:center}
-.sm-hero .ov{position:absolute;inset:0;background:linear-gradient(115deg,rgba(0,0,0,.8) 0%,rgba(0,0,0,.55) 45%,rgba(0,0,0,.3) 100%)}
+.sm-hero .ov{position:absolute;inset:0;background:linear-gradient(115deg,rgba(0,0,0,.78) 0%,rgba(0,0,0,.6) 50%,rgba(0,0,0,.4) 100%)}
 .sm-hero .in{position:relative;max-width:var(--maxw);margin:0 auto;padding:70px 22px;width:100%}
 .sm-eyebrow{display:inline-block;text-transform:uppercase;letter-spacing:.14em;font-size:12px;font-weight:800;padding:6px 13px;border-radius:999px;background:var(--accent);color:var(--accent-text)}
-.sm-hero h1{font-size:clamp(34px,6.2vw,60px);line-height:1.03;margin:18px 0 16px;font-weight:800;letter-spacing:-.02em;max-width:16ch}
+.sm-hero h1{font-size:clamp(32px,5.2vw,54px);line-height:1.15;margin:18px 0 16px;font-weight:800;letter-spacing:.005em;max-width:18ch;text-shadow:0 2px 18px rgba(0,0,0,.45)}
+.sm-logo{height:40px;width:auto;max-width:180px;object-fit:contain;display:block}
+.sm-gal{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.sm-gal img{width:100%;height:220px;object-fit:cover;border-radius:14px}
 .sm-hero p.sub{font-size:clamp(16px,2.2vw,21px);max-width:48ch;color:rgba(255,255,255,.92)}
 .sm-cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}
 .sm-sec{max-width:var(--maxw);margin:0 auto;padding:78px 22px}

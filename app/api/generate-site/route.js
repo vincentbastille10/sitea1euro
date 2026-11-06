@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createSite, getSiteBySlug } from "../../../lib/sites-db";
+import { createSite, getSiteBySlug, enrichSite } from "../../../lib/sites-db";
 import { generateHeroImageUrl } from "../../../lib/hero-image";
 import { sendSiteEmail, sendBettyOnlyEmail } from "../../../lib/mail";
 import { getMetierById } from "../../../lib/metiers";
@@ -123,6 +123,7 @@ export async function POST(req) {
   };
 
   await createSite(site);
+  try { await enrichSite(slug); } catch (e) { console.warn("[ENRICH]", e); } // scrape du site d'origine, une fois
 
   // Offre B (le prospect a déjà un site) : on demande à MyBetty de crawler son
   // site pour pré-remplir la Betty (scriptée sans LLM), prête à l'essai.

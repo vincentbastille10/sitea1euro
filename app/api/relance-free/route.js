@@ -2,6 +2,7 @@
 // File = table relance_free (remplie à la main avec les cliqueurs dont site et métier sont alignés).
 import { NextResponse } from "next/server";
 import pg from "pg";
+import { enrichSite } from "../../../lib/sites-db";
 import { mgSend } from "../../../lib/mailgun.js";
 import { unsubscribeUrl } from "../../../lib/unsubscribe-token";
 import { isUnsubscribed } from "../../../lib/unsubscribes-db";
@@ -66,6 +67,7 @@ export async function GET(req) {
   let sent = 0, failed = 0, skipped = 0;
   for (const r of rows) {
     if (await isUnsubscribed(r.email)) { skipped++; await pool().query(`UPDATE relance_free SET sent_at=NOW(), note='unsub' WHERE email=$1`, [r.email]); continue; }
+    try { await enrichSite(r.slug); } catch (e) { console.warn("[ENRICH]", e.message); } // site fabriqué AVANT le mail
     const m = build(r, root);
     const res = await mgSend({ to: r.email, subject: m.subject, text: m.text, html: m.html, headers: m.headers, fromName: "Betty — Spectra Media" });
     if (res.ok) { sent++; await pool().query(`UPDATE relance_free SET sent_at=NOW() WHERE email=$1`, [r.email]); }
