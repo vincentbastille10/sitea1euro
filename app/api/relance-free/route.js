@@ -9,6 +9,15 @@ import { isUnsubscribed } from "../../../lib/unsubscribes-db";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
+// Contrôle qualité : un site trop pauvre n'est PAS envoyé (mis de côté pour revue), jamais de mail vers un site moche.
+function qualityOk(site) {
+  const sc = site?.scrape;
+  if (!sc) return false;
+  const svc = (sc.services || []).filter((x) => x?.title);
+  const imgs = new Set(svc.map((x) => x.image).filter(Boolean));
+  return (sc.about || "").length >= 120 && svc.length >= 3 && imgs.size >= 3 && !!(sc.logo || sc.tagline)
+    && !/^(presentation|home|accueil|index|english|français)$/i.test(svc[0].title);
+}
 const BATCH = 25; // Mailgun bride mg.hypermusic.online à ~26 destinataires par fenêtre : on reste dessous
 
 let _p;
@@ -83,15 +92,23 @@ export async function GET(req) {
   }
 
   const { rows } = await pool().query(
-    `SELECT * FROM relance_free WHERE sent_at IS NULL ORDER BY id LIMIT $1`, [BATCH]);
+    `SELECT * FROM relance_free WHERE sent_at IS NULL AND (note IS NULL OR note NOT LIKE 'low_quality%') ORDER BY id LIMIT $1`, [BATCH]);
   // sites fabriqués AVANT les mails, 15 en parallèle
   for (let i = 0; i < rows.length; i += 15) {
     const res = await Promise.allSettled(rows.slice(i, i + 15).map((r) => enrichSite(r.slug)));
-    res.forEach((x, j) => { if (x.status === "fulfilled" && x.value?.nom_enseigne) rows[i + j].company = x.value.nom_enseigne; });
+    res.forEach((x, j) => {
+      const r = rows[i + j];
+      if (x.status === "fulfilled" && x.value?.nom_enseigne) r.company = x.value.nom_enseigne;
+      r.good = x.status === "fulfilled" && qualityOk(x.value);
+    });
   }
   let sent = 0, failed = 0, skipped = 0;
   for (const r of rows) {
     if (await isUnsubscribed(r.email)) { skipped++; await pool().query(`UPDATE relance_free SET sent_at=NOW(), note='unsub' WHERE email=$1`, [r.email]); continue; }
+    if (!r.good && r.email !== "vincentbastille100@gmail.com") {
+      await pool().query(`UPDATE relance_free SET note='low_quality' WHERE email=$1`, [r.email]);
+      skipped++; continue;
+    }
     const m = build(r, root);
     const res = await mgSend({ to: r.email, subject: m.subject, text: m.text, html: m.html, headers: m.headers, fromName: "Betty — Spectra Media" });
     if (res.ok) { sent++; await pool().query(`UPDATE relance_free SET sent_at=NOW() WHERE email=$1`, [r.email]); }
