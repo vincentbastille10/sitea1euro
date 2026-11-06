@@ -29,9 +29,9 @@ export async function generateMetadata({ params }) {
   const metier = getMetierById(site.metier);
   const lang = siteLang(site, metier);
   const state = getSiteState(site);
-  if (!state.accessible) {
+  if (state.status === "suspended") {
     return {
-      title: lang === "en" ? "Preview expired" : "Aperçu expiré",
+      title: lang === "en" ? "Site unavailable" : "Site indisponible",
       robots: { index: false, follow: false },
     };
   }
@@ -78,7 +78,7 @@ export default async function Site({ params }) {
   const nom = site.nom_enseigne;
   const ville = site.ville;
   const state = getSiteState(site);
-  if (!state.accessible) {
+  if (state.status === "suspended") { // expiration 7j désactivée : seuls les sites suspendus restent bloqués
     return <ExpiredSite site={site} lang={lang} suspended={state.status === "suspended"} />;
   }
   const act = site.metier_label || metier?.label || site.metier;
