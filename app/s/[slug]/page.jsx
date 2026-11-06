@@ -20,7 +20,7 @@ function cleanAbout(txt) {
   const keep = [];
   for (const x of sents) {
     if (/thank you|thanks|our property|we feel|highly recommend|merci|testimonial|avis client/i.test(x)) break;
-    if ((keep.join("") + x).length > 420) break;
+    if ((keep.join("") + x).length > 750) break;
     keep.push(x);
   }
   return keep.join("").trim();
