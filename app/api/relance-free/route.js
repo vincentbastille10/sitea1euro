@@ -61,7 +61,14 @@ export async function GET(req) {
   }
   const auth = req.headers.get("authorization") || "";
   const key = new URL(req.url).searchParams.get("key");
-  if (!process.env.CRON_SECRET || (auth !== `Bearer ${process.env.CRON_SECRET}` && key !== process.env.CRON_SECRET))
+  // Déclenchement manuel à usage unique : jeton posé en base, supprimé dès qu'il sert.
+  const run = new URL(req.url).searchParams.get("run");
+  let oneShot = false;
+  if (run) {
+    await pool().query(`CREATE TABLE IF NOT EXISTS relance_run_token (token TEXT PRIMARY KEY)`);
+    oneShot = (await pool().query(`DELETE FROM relance_run_token WHERE token=$1`, [run])).rowCount === 1;
+  }
+  if (!oneShot && !process.env.CRON_SECRET || (auth !== `Bearer ${process.env.CRON_SECRET}` && key !== process.env.CRON_SECRET) && !oneShot)
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   if (!process.env.UNSUBSCRIBE_SECRET || !process.env.MAILGUN_API_KEY)
     return NextResponse.json({ ok: false, error: "UNSUBSCRIBE_SECRET ou MAILGUN_API_KEY manquant : aucun envoi" });
