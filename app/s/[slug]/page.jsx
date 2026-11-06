@@ -167,6 +167,15 @@ export default async function Site({ params }) {
 
   // Site « sur mesure » : couleur de marque du prospect en accent (défaut rose Spectra).
   const sc = site.scrape || {};
+  // Aucune photo en double sur la page : services (1re occurrence gardée), galerie et hero.
+  const imgKey = (u) => (u || "").split("?")[0].replace(/-\d+x\d+(?=\.\w+$)/, "");
+  const usedImg = new Set([imgKey(bg)].filter(Boolean));
+  const svcList = (Array.isArray(sc.services) ? sc.services : []).map((sv) => {
+    const o = typeof sv === "string" ? { title: sv } : { ...sv };
+    if (o.image) { const k = imgKey(o.image); if (usedImg.has(k)) o.image = ""; else usedImg.add(k); }
+    return o;
+  });
+  const galPhotos = (Array.isArray(sc.photos) ? sc.photos : []).filter((u) => { const k = imgKey(u); if (!k || usedImg.has(k)) return false; usedImg.add(k); return true; });
   const accent = /^#[0-9a-fA-F]{6}$/.test(site.brand_color || "") ? site.brand_color
     : /^#[0-9a-fA-F]{6}$/.test(sc.color || "") ? sc.color : "#b76e79";
   const _l = [1, 3, 5].map((i) => parseInt(accent.slice(i, i + 2), 16));
@@ -240,9 +249,9 @@ export default async function Site({ params }) {
         <p className="sm-lead">{cleanAbout(sc.about) || t.aboutP}</p>
       </section>
 
-      {Array.isArray(sc.photos) && sc.photos.length >= 2 && (
+      {galPhotos.length >= 2 && (
         <section className="sm-sec" style={{ paddingTop: 0 }}>
-          <div className="sm-gal">{sc.photos.slice(0, 4).map((u, i) => <img key={i} src={u} alt={nom} loading="lazy" />)}</div>
+          <div className="sm-gal">{galPhotos.slice(0, 4).map((u, i) => <img key={i} src={u} alt={nom} loading="lazy" />)}</div>
         </section>
       )}
 
@@ -251,14 +260,9 @@ export default async function Site({ params }) {
         <div className="sm-kicker">{t.featKicker}</div>
         <h2 className="sm-h2">{t.featH}</h2>
         <div className="sm-grid3">
-          {Array.isArray(sc.services) && sc.services.length >= 3
-            ? sc.services.slice(0, 6).map((sv, i, arr) => {
-                const o = typeof sv === "string" ? { title: sv } : { ...sv };
-                if (o.image && arr.filter((z) => z && z.image === o.image).length > 1) o.image = ""; // image répétée = pas d'image
+          {svcList.length >= 3
+            ? svcList.slice(0, 6).map((o, i) => {
                 const body = cutSentence(o.text) || (en ? `Ask our assistant about ${o.title}: details, availability or a quote, answered instantly.` : `Demandez à notre assistant pour ${o.title} : détails, disponibilités ou devis, réponse immédiate.`);
-                const _unused = (en
-                  ? `${o.title} with ${nom}: a dedicated team that handles everything for you. Ask our assistant for details, availability or a quote.`
-                  : `${o.title} avec ${nom} : une équipe dédiée qui s’occupe de tout pour vous. Demandez à notre assistant des détails, les disponibilités ou un devis.`);
                 return (
                   <details className="sm-card sm-svc" key={i}>
                     <summary><span className="sm-ic"><Icon d={IC.bolt} /></span><h3>{o.title}</h3><span className="plus">+</span></summary>
