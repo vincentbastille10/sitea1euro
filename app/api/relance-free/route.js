@@ -21,18 +21,18 @@ function build(r, root) {
   const url = `https://${r.slug}.${root}`;
   const price = en ? "$5" : "5 €";
   const co = r.company || (en ? "your business" : "votre activité");
-  const subject = en ? `${co}: your website + Betty are now 100% free`
-                     : `${co} : votre site + Betty sont désormais 100 % gratuits`;
+  const subject = en ? `${co}: a free website that collects leads for you`
+                     : `${co} : un site gratuit qui collecte des leads pour vous`;
   const lines = en ? [
-    `I built a website for <strong>${co}</strong>, with Betty, a virtual assistant who answers your visitors day and night using your own website's information.`,
-    `<strong>Both are now completely free.</strong> No subscription, no card, nothing to lose.`,
-    `You only pay when Betty brings you a lead (name, email and phone): <strong>${price} per lead</strong>, to unlock it. No lead, no cost.`,
+    `I built a website for <strong>${co}</strong>, with a virtual assistant (Betty) who talks to your visitors day and night, using your own website's information, and collects their name, email and phone number.`,
+    `<strong>The website and the assistant are now completely free.</strong> No subscription, no card, nothing to lose.`,
+    `You only pay when a lead is collected: <strong>${price} per lead</strong>, to unlock their details. No lead, no cost.`,
   ] : [
-    `J'ai préparé un site pour <strong>${co}</strong>, avec Betty, une assistante virtuelle qui répond à vos visiteurs jour et nuit à partir des infos de votre propre site.`,
-    `<strong>Les deux sont désormais totalement gratuits.</strong> Pas d'abonnement, pas de carte, rien à perdre.`,
-    `Vous ne payez que lorsque Betty vous ramène un contact (nom, email et téléphone) : <strong>${price} par lead</strong>, pour le débloquer. Pas de lead, pas de frais.`,
+    `J'ai préparé un site pour <strong>${co}</strong>, avec un assistant virtuel (Betty) qui discute avec vos visiteurs jour et nuit à partir des infos de votre propre site, et collecte leur nom, leur email et leur téléphone.`,
+    `<strong>Le site et l'assistant sont désormais totalement gratuits.</strong> Pas d'abonnement, pas de carte, rien à perdre.`,
+    `Vous ne payez que lorsqu'un lead est collecté : <strong>${price} par lead</strong>, pour débloquer ses coordonnées. Pas de lead, pas de frais.`,
   ];
-  const cta = en ? "See my website and Betty →" : "Voir mon site et Betty →";
+  const cta = en ? "See my free website →" : "Voir mon site gratuit →";
   const unsub = unsubscribeUrl(r.email);
   const unsubTxt = en ? "Unsubscribe" : "Se désabonner";
   const strip = (s) => s.replace(/<\/?strong>/g, "");
