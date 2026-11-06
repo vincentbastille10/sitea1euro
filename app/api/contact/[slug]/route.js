@@ -27,7 +27,7 @@ export async function POST(req, { params }) {
 
     // La page expirée ne montre plus le formulaire, mais cette vérification
     // serveur empêche aussi un envoi direct vers l'ancienne URL de l'API.
-    if (!getSiteState(site).accessible) {
+    if (getSiteState(site).status === "suspended") {
       return NextResponse.json(
         { ok: false, error: "Cet aperçu a expiré. Le formulaire est désactivé." },
         { status: 410 }
