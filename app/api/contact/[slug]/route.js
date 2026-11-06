@@ -1,6 +1,7 @@
 import { mgSend } from "../../../../lib/mailgun.js";
 import { NextResponse } from "next/server";
-import { getSiteBySlug } from "../../../../lib/sites-db";
+import { randomUUID } from "node:crypto";
+import { getSiteBySlug, createLead } from "../../../../lib/sites-db";
 import { getSiteState } from "../../../../lib/site-access";
 
 export const runtime = "nodejs";
@@ -60,16 +61,20 @@ export async function POST(req, { params }) {
       );
     }
 
-    const html = `
-      <h2>Nouveau message reçu depuis votre site</h2>
-      <p><strong>Nom :</strong> ${name}</p>
-      <p><strong>Email :</strong> ${email}</p>
-      <p><strong>Message :</strong><br>${message.replace(/\n/g, "<br>")}</p>
-    `;
-
+    // Lead masqué : l'email ne contient AUCUNE coordonnée tant que 5 € ne sont pas payés.
+    const id = randomUUID();
+    await createLead(id, slug, { name, email, message });
+    const root = process.env.ROOT_DOMAIN || "spectramedia.online";
+    const url = `https://${root}/lead/${id}`;
+    const fr = site.lang !== "en";
+    const price = fr ? "5 €" : "$5";
+    const subject = fr ? "Betty a capté un nouveau lead pour vous" : "Betty captured a new lead for you";
+    const html = fr
+      ? `<h2>Un visiteur de votre site vous a écrit</h2><p>Débloquez ses coordonnées et son message pour ${price} :</p><p><a href="${url}">Débloquer ce lead (${price})</a></p>`
+      : `<h2>A visitor of your site wrote to you</h2><p>Unlock their contact details and message for ${price}:</p><p><a href="${url}">Unlock this lead (${price})</a></p>`;
     const resMail = await mgSend({
-      to: dest, subject: "Nouveau message reçu depuis votre site", html,
-      text: `Nom: ${name}\nEmail: ${email}\n\n${message}`, fromName,
+      to: dest, subject, html,
+      text: `${subject}\n${url}`, fromName,
     });
 
     if (!resMail.ok) {

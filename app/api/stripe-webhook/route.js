@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { markBotPaid, markBotUnpaid } from "../../../lib/betty-bot";
-import { markSiteActive, markSiteSuspended } from "../../../lib/sites-db";
+import { markSiteActive, markSiteSuspended, markLeadPaid, getSiteBySlug } from "../../../lib/sites-db";
+import { mgSend } from "../../../lib/mailgun.js";
 import { pingIndexNow } from "../../../lib/indexnow";
 
 // Note indexation Google : contrairement à une idée répandue, Google n'a PAS
@@ -44,6 +45,22 @@ export async function POST(req) {
     if (event.type === "checkout.session.completed") {
       const session = event.data.object;
       const md = session.metadata || {};
+      if (md.lead_id) {
+        // Lead à 5 € payé : on envoie enfin les coordonnées au propriétaire.
+        const lead = await markLeadPaid(md.lead_id);
+        if (lead) {
+          const site = await getSiteBySlug(lead.slug);
+          const { name, email, message } = lead.data;
+          const esc = (v) => String(v).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+          const r = await mgSend({
+            to: site.email, subject: "Votre lead / Your lead", fromName: "Spectra Media", replyTo: email,
+            html: `<p><strong>${esc(name)}</strong> — ${esc(email)}</p><p>${esc(message).replace(/\n/g, "<br>")}</p>`,
+            text: `${name} — ${email}\n\n${message}`,
+          });
+          if (!r.ok) throw new Error("envoi lead débloqué échoué: " + r.error);
+        }
+        return NextResponse.json({ received: true });
+      }
       if (!md.slug) throw new Error("slug absent des metadata Checkout");
 
       const siteActivated = await markSiteActive(md.slug, {
