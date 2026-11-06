@@ -203,7 +203,7 @@ export default async function Site({ params }) {
         <div className="in">
           <span className="sm-eyebrow">{t.heroEyebrow}</span>
           <h1>{nom}</h1>
-          <p className="sub">{sc.tagline ? sc.tagline.replace(/\.(?=[A-Z])/g, ". ") : t.heroSub}</p>
+          <p className="sub">{sc.tagline ? sc.tagline.replace(/\.(?=[A-Z])/g, ". ").replace(nom, "").trim() : t.heroSub}</p>
           <div className="sm-cta">
             <a className="sm-btn" href="#betty">{t.heroCta1}</a>
             <a className="sm-btn ghost" href="#contact">{t.heroCta2}</a>
