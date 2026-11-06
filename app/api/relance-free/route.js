@@ -46,6 +46,18 @@ ${lines.map((l) => `<p>${l}</p>`).join("")}
 }
 
 export async function GET(req) {
+  // Aperçu immédiat : n'envoie QUE à l'adresse du propriétaire, sans toucher à la file (à retirer après validation).
+  if (new URL(req.url).searchParams.get("preview") === "1") {
+    if (!process.env.MAILGUN_API_KEY || !process.env.UNSUBSCRIBE_SECRET)
+      return NextResponse.json({ ok: false, error: "clés manquantes" });
+    const to = "vincentbastille100@gmail.com";
+    const { rows } = await pool().query(`SELECT * FROM relance_free WHERE email=$1 LIMIT 1`, [to]);
+    const r = rows[0] || { slug: "robertmasseyco", company: "Robert Massey Company", lang: "en" };
+    const site = await enrichSite(r.slug).catch(() => null);
+    const m = build({ ...r, email: to, company: site?.nom_enseigne || r.company }, process.env.ROOT_DOMAIN || "spectramedia.online");
+    const res = await mgSend({ to, subject: m.subject, text: m.text, html: m.html, headers: m.headers, fromName: "Betty — Spectra Media" });
+    return NextResponse.json({ preview: true, ok: res.ok, error: res.error });
+  }
   const auth = req.headers.get("authorization") || "";
   const key = new URL(req.url).searchParams.get("key");
   if (!process.env.CRON_SECRET || (auth !== `Bearer ${process.env.CRON_SECRET}` && key !== process.env.CRON_SECRET))
@@ -65,8 +77,10 @@ export async function GET(req) {
   const { rows } = await pool().query(
     `SELECT * FROM relance_free WHERE sent_at IS NULL ORDER BY id LIMIT $1`, [BATCH]);
   // sites fabriqués AVANT les mails, 15 en parallèle
-  for (let i = 0; i < rows.length; i += 15)
-    await Promise.allSettled(rows.slice(i, i + 15).map((r) => enrichSite(r.slug)));
+  for (let i = 0; i < rows.length; i += 15) {
+    const res = await Promise.allSettled(rows.slice(i, i + 15).map((r) => enrichSite(r.slug)));
+    res.forEach((x, j) => { if (x.status === "fulfilled" && x.value?.nom_enseigne) rows[i + j].company = x.value.nom_enseigne; });
+  }
   let sent = 0, failed = 0, skipped = 0;
   for (const r of rows) {
     if (await isUnsubscribed(r.email)) { skipped++; await pool().query(`UPDATE relance_free SET sent_at=NOW(), note='unsub' WHERE email=$1`, [r.email]); continue; }
