@@ -20,7 +20,7 @@ function cleanAbout(txt) {
   const keep = [];
   for (const x of sents) {
     if (/thank you|thanks|our property|we feel|highly recommend|merci|testimonial|avis client/i.test(x)) break;
-    if ((keep.join("") + x).length > 750) break;
+    if ((keep.join("") + x).length > 1000) break;
     keep.push(x);
   }
   return keep.join("").trim();
@@ -115,7 +115,7 @@ export default async function Site({ params }) {
         heroCta1: "Chat with our assistant", heroCta2: "Get in touch",
         aboutKicker: "About", aboutH: `Your ${actLow} in ${ville}`,
         aboutP: `${nom} puts genuine care and expertise at the service of its clients in ${ville}. From the first message to the finished result, every request is handled with attention, precision and reliability.`,
-        featKicker: "Why us", featH: "Why clients trust us",
+        featKicker: "Our services", featH: "Everything you need, handled for you",
         f1H: "Available 24/7", f1P: "A question late at night or over the weekend? Our assistant answers right away.",
         f2H: `Rooted in ${ville}`, f2P: "A local, personal service that truly listens to your needs.",
         f3H: "No waiting", f3P: "Every request is picked up immediately — no opportunity slips through.",
@@ -133,7 +133,7 @@ export default async function Site({ params }) {
         heroCta1: `Discuter avec ${asstFr}`, heroCta2: "Nous contacter",
         aboutKicker: "À propos", aboutH: `Votre ${actLow} à ${ville}`,
         aboutP: `${nom} met son savoir-faire et son sens du détail au service de ses client·es à ${ville}. Du premier échange à la réalisation, chaque demande est traitée avec soin, exigence et fiabilité.`,
-        featKicker: "Nos atouts", featH: "Pourquoi nous faire confiance",
+        featKicker: "Nos services", featH: "Tout ce dont vous avez besoin, on s’en occupe",
         f1H: "Disponible 24h/24", f1P: `Une question tard le soir ou le week-end ? Votre ${asstFrShort} vous répond immédiatement.`,
         f2H: `Ancré à ${ville}`, f2P: "Un service de proximité, personnel, à l’écoute de vos besoins.",
         f3H: "Sans délai", f3P: "Chaque demande est prise en compte tout de suite — aucune opportunité ne se perd.",
@@ -242,15 +242,36 @@ export default async function Site({ params }) {
         <h2 className="sm-h2">{t.featH}</h2>
         <div className="sm-grid3">
           {Array.isArray(sc.services) && sc.services.length >= 3
-            ? sc.services.slice(0, 6).map((h, i) => (
-                <div className="sm-card" key={i}><div className="sm-ic"><Icon d={IC.bolt} /></div><h3>{h}</h3></div>
-              ))
+            ? sc.services.slice(0, 6).map((sv, i) => {
+                const o = typeof sv === "string" ? { title: sv } : sv;
+                const body = o.text || (en
+                  ? `${o.title} with ${nom}: a dedicated team that handles everything for you. Ask our assistant for details, availability or a quote.`
+                  : `${o.title} avec ${nom} : une équipe dédiée qui s’occupe de tout pour vous. Demandez à notre assistant des détails, les disponibilités ou un devis.`);
+                return (
+                  <details className="sm-card sm-svc" key={i}>
+                    <summary><span className="sm-ic"><Icon d={IC.bolt} /></span><h3>{o.title}</h3><span className="plus">+</span></summary>
+                    <div className="sm-svc-body">
+                      {o.image && <img src={o.image} alt={o.title} loading="lazy" />}
+                      <p>{body}</p>
+                      <a className="sm-btn" href="#betty">{en ? `Ask about ${o.title}` : `Poser une question sur ${o.title}`}</a>
+                    </div>
+                  </details>
+                );
+              })
             : [[IC.clock, t.f1H, t.f1P], [IC.pin, t.f2H, t.f2P], [IC.bolt, t.f3H, t.f3P]].map(([d, h, p], i) => (
                 <div className="sm-card" key={i}>
                   <div className="sm-ic"><Icon d={d} /></div>
                   <h3>{h}</h3><p>{p}</p>
                 </div>
               ))}
+        </div>
+      </section>
+
+      <section className="sm-band">
+        <div className="in">
+          <h2>{en ? `Ready to talk to ${nom}?` : `Prêt à échanger avec ${nom} ?`}</h2>
+          <p>{en ? "Get an answer in seconds, day or night. No call, no waiting." : "Obtenez une réponse en quelques secondes, jour et nuit. Sans appel, sans attente."}</p>
+          <a className="sm-btn" href="#betty">{en ? "Talk to our assistant now" : "Parler à notre assistant maintenant"}</a>
         </div>
       </section>
 
@@ -375,6 +396,21 @@ const SM_CSS = `
 .sm-kicker{color:var(--accent);font-weight:800;text-transform:uppercase;letter-spacing:.12em;font-size:13px}
 .sm-h2{font-size:clamp(26px,4vw,38px);font-weight:800;letter-spacing:-.02em;margin:8px 0 18px}
 .sm-lead{font-size:18px;line-height:1.75;color:#4a4038;max-width:62ch}
+.sm-svc{padding:0;overflow:hidden}
+.sm-svc summary{display:flex;align-items:center;gap:14px;padding:22px 26px;cursor:pointer;list-style:none}
+.sm-svc summary::-webkit-details-marker{display:none}
+.sm-svc summary h3{margin:0;flex:1}
+.sm-svc .sm-ic{margin:0}
+.sm-svc .plus{font-size:26px;color:var(--accent);font-weight:300;transition:transform .2s}
+.sm-svc[open] .plus{transform:rotate(45deg)}
+.sm-svc-body{padding:0 26px 26px}
+.sm-svc-body img{width:100%;height:170px;object-fit:cover;border-radius:12px;margin-bottom:14px}
+.sm-svc-body p{margin:0 0 16px}
+.sm-band{background:var(--accent);color:var(--accent-text,#fff);text-align:center;padding:64px 22px}
+.sm-band .in{max-width:var(--maxw);margin:0 auto}
+.sm-band h2{font-size:clamp(26px,4vw,38px);margin:0 0 10px;font-weight:800}
+.sm-band p{margin:0 0 24px;font-size:18px;opacity:.92}
+.sm-band .sm-btn{background:#fff;color:#1a1a1a}
 .sm-grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:22px}
 .sm-card{background:#fff;border:1px solid #eee5dd;border-radius:18px;padding:26px;box-shadow:0 6px 24px rgba(120,80,60,.05)}
 .sm-ic{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;background:var(--accent);color:var(--accent-text);margin-bottom:14px}

@@ -8,7 +8,7 @@ import { unsubscribeUrl } from "../../../lib/unsubscribe-token";
 import { isUnsubscribed } from "../../../lib/unsubscribes-db";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 60;
+export const maxDuration = 300;
 const BATCH = 90;
 
 let _p;
@@ -64,10 +64,12 @@ export async function GET(req) {
 
   const { rows } = await pool().query(
     `SELECT * FROM relance_free WHERE sent_at IS NULL ORDER BY id LIMIT $1`, [BATCH]);
+  // sites fabriqués AVANT les mails, 15 en parallèle
+  for (let i = 0; i < rows.length; i += 15)
+    await Promise.allSettled(rows.slice(i, i + 15).map((r) => enrichSite(r.slug)));
   let sent = 0, failed = 0, skipped = 0;
   for (const r of rows) {
     if (await isUnsubscribed(r.email)) { skipped++; await pool().query(`UPDATE relance_free SET sent_at=NOW(), note='unsub' WHERE email=$1`, [r.email]); continue; }
-    try { await enrichSite(r.slug); } catch (e) { console.warn("[ENRICH]", e.message); } // site fabriqué AVANT le mail
     const m = build(r, root);
     const res = await mgSend({ to: r.email, subject: m.subject, text: m.text, html: m.html, headers: m.headers, fromName: "Betty — Spectra Media" });
     if (res.ok) { sent++; await pool().query(`UPDATE relance_free SET sent_at=NOW() WHERE email=$1`, [r.email]); }
