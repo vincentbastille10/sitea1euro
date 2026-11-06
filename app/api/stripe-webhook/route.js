@@ -50,12 +50,12 @@ export async function POST(req) {
         const lead = await markLeadPaid(md.lead_id);
         if (lead) {
           const site = await getSiteBySlug(lead.slug);
-          const { name, email, message } = lead.data;
+          const { name, email, message, phone } = lead.data;
           const esc = (v) => String(v).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
           const r = await mgSend({
             to: site.email, subject: "Votre lead / Your lead", fromName: "Spectra Media", replyTo: email,
-            html: `<p><strong>${esc(name)}</strong> — ${esc(email)}</p><p>${esc(message).replace(/\n/g, "<br>")}</p>`,
-            text: `${name} — ${email}\n\n${message}`,
+            html: `<p><strong>${esc(name)}</strong> — ${esc(email)}${phone ? " — " + esc(phone) : ""}</p><p>${esc(message).replace(/\n/g, "<br>")}</p>`,
+            text: `${name} — ${email}${phone ? " — " + phone : ""}\n\n${message}`,
           });
           if (!r.ok) throw new Error("envoi lead débloqué échoué: " + r.error);
         }
