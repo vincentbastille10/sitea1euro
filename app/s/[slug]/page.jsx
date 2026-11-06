@@ -168,12 +168,12 @@ export default async function Site({ params }) {
   // Site « sur mesure » : couleur de marque du prospect en accent (défaut rose Spectra).
   const sc = site.scrape || {};
   // Aucune photo en double sur la page : services (1re occurrence gardée), galerie et hero.
-  const uncrop = (u) => /images\.pexels\.com/.test(u || "") ? u.replace(/\?.*$/, "?auto=compress&cs=tinysrgb&w=1000") : u;
+  const uncrop = (u, w = 1000) => /images\.pexels\.com/.test(u || "") ? u.replace(/\?.*$/, `?auto=compress&cs=tinysrgb&w=${w}`) : u;
   const imgKey = (u) => (u || "").split("?")[0].replace(/-\d+x\d+(?=\.\w+$)/, "");
   const usedImg = new Set([imgKey(bg)].filter(Boolean));
   const svcList = (Array.isArray(sc.services) ? sc.services : []).map((sv) => {
     const o = typeof sv === "string" ? { title: sv } : { ...sv };
-    if (o.image) o.image = uncrop(o.image);
+    if (o.image) o.image = uncrop(o.image, 640);
     if (o.image) { const k = imgKey(o.image); if (usedImg.has(k)) o.image = ""; else usedImg.add(k); }
     return o;
   });
@@ -217,6 +217,8 @@ export default async function Site({ params }) {
       <script type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
       <style dangerouslySetInnerHTML={{ __html: SM_CSS }} />
+      {bg && <link rel="preload" as="image" href={uncrop(bg, 1600)} />}
+      {svcList.slice(0, 6).map((o, i) => o.image ? <link key={i} rel="preload" as="image" href={o.image} /> : null)}
 
       <header className="sm-header">
         <div className="in">
@@ -231,7 +233,7 @@ export default async function Site({ params }) {
 
       {/* HERO */}
       <section className="sm-hero">
-        <div className="bgimg" style={{ backgroundImage: bg ? `url(${uncrop(bg)})` : "linear-gradient(135deg,#1a1a1a,#333)" }} />
+        <div className="bgimg" style={{ backgroundImage: bg ? `url(${uncrop(bg, 1600)})` : "linear-gradient(135deg,#1a1a1a,#333)" }} />
         <div className="ov" />
         <div className="in">
           <span className="sm-eyebrow">{t.heroEyebrow}</span>
@@ -269,7 +271,7 @@ export default async function Site({ params }) {
                   <details className="sm-card sm-svc" key={i}>
                     <summary><span className="sm-ic"><Icon d={IC.bolt} /></span><h3>{o.title}</h3><span className="plus">+</span></summary>
                     <div className="sm-svc-body">
-                      {o.image && <img src={o.image} alt={o.title} loading="lazy" referrerPolicy="no-referrer" />}
+                      {o.image && <img src={o.image} alt={o.title} loading="eager" decoding="async" referrerPolicy="no-referrer" />}
                       <p>{body}</p>
                       <a className="sm-btn" href="#betty">{en ? `Ask about ${o.title}` : `Poser une question sur ${o.title}`}</a>
                     </div>
