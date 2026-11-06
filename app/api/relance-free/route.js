@@ -55,8 +55,9 @@ export async function GET(req) {
     const r = rows[0] || { slug: "robertmasseyco", company: "Robert Massey Company", lang: "en" };
     const site = await enrichSite(r.slug).catch(() => null);
     const m = build({ ...r, email: to, company: site?.nom_enseigne || r.company }, process.env.ROOT_DOMAIN || "spectramedia.online");
-    const res = await mgSend({ to, subject: m.subject, text: m.text, html: m.html, headers: m.headers, fromName: "Betty — Spectra Media" });
-    return NextResponse.json({ preview: true, ok: res.ok, error: res.error });
+    const dm = new URL(req.url).searchParams.get("domain") || undefined;
+    const res = await mgSend({ to, subject: m.subject, text: m.text, html: m.html, headers: m.headers, fromName: "Betty — Spectra Media", domain: dm });
+    return NextResponse.json({ domain: dm, preview: true, ok: res.ok, error: res.error });
   }
   const auth = req.headers.get("authorization") || "";
   const key = new URL(req.url).searchParams.get("key");
