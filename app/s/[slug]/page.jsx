@@ -2,11 +2,17 @@ import { cache } from "react";
 import { notFound } from "next/navigation";
 import { getSiteBySlug } from "../../../lib/sites-db";
 import { getMetierById, isMalePack } from "../../../lib/metiers";
+import { betterName } from "../../../lib/display-name";
+import { generateHeroImageUrl } from "../../../lib/hero-image";
 import { getSiteState } from "../../../lib/site-access";
 
 // React cache() : une seule requête DB par rendu, partagée entre
 // generateMetadata() et le composant de page.
-const getSite = cache(getSiteBySlug);
+const getSite = cache(async (slug) => {
+  const s = await getSiteBySlug(slug);
+  if (s) s.nom_enseigne = await betterName(s);
+  return s;
+});
 
 function siteLang(site, metier) {
   return (site.lang === "en" || site.lang === "fr")
@@ -127,7 +133,15 @@ export default async function Site({ params }) {
         bettyActivating: `${male ? "Assistant" : "Assistante"} en cours d’activation.`, poweredBy: "Propulsé par Spectra Media",
       };
 
-  const bg = site.hero_image_url || "";
+  let bg = site.hero_image_url || "";
+  // L'image scrapée du site d'origine (og:image) est souvent un logo ou une capture d'écran :
+  // illisible en fond de hero. On la remplace par une photo Pexels du métier.
+  try {
+    const own = new URL(site.site_url || "").hostname.replace(/^www\./, "");
+    if (bg && own && new URL(bg).hostname.replace(/^www\./, "").endsWith(own)) {
+      bg = await generateHeroImageUrl(site.metier, nom, ville, lang, site.metier_label, site.brand_color);
+    }
+  } catch {}
 
   // Site « sur mesure » : couleur de marque du prospect en accent (défaut rose Spectra).
   const accent = /^#[0-9a-fA-F]{6}$/.test(site.brand_color || "") ? site.brand_color : "#b76e79";
