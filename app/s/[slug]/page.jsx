@@ -14,6 +14,18 @@ const getSite = cache(async (slug) => {
   return s;
 });
 
+// Texte « à propos » scrapé : on garde les phrases de présentation (pas les témoignages clients) et on coupe proprement.
+function cleanAbout(txt) {
+  const sents = (txt || "").match(/[^.!?]+[.!?]+(\s|$)/g) || [];
+  const keep = [];
+  for (const x of sents) {
+    if (/thank you|thanks|our property|we feel|highly recommend|merci|testimonial|avis client/i.test(x)) break;
+    if ((keep.join("") + x).length > 420) break;
+    keep.push(x);
+  }
+  return keep.join("").trim();
+}
+
 function siteLang(site, metier) {
   return (site.lang === "en" || site.lang === "fr")
     ? site.lang
@@ -215,7 +227,7 @@ export default async function Site({ params }) {
       <section className="sm-sec" id="apropos">
         <div className="sm-kicker">{t.aboutKicker}</div>
         <h2 className="sm-h2">{t.aboutH}</h2>
-        <p className="sm-lead">{sc.about || t.aboutP}</p>
+        <p className="sm-lead">{cleanAbout(sc.about) || t.aboutP}</p>
       </section>
 
       {Array.isArray(sc.photos) && sc.photos.length >= 2 && (
