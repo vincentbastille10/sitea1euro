@@ -168,10 +168,12 @@ export default async function Site({ params }) {
   // Site « sur mesure » : couleur de marque du prospect en accent (défaut rose Spectra).
   const sc = site.scrape || {};
   // Aucune photo en double sur la page : services (1re occurrence gardée), galerie et hero.
+  const uncrop = (u) => /images\.pexels\.com/.test(u || "") ? u.replace(/\?.*$/, "?auto=compress&cs=tinysrgb&w=1000") : u;
   const imgKey = (u) => (u || "").split("?")[0].replace(/-\d+x\d+(?=\.\w+$)/, "");
   const usedImg = new Set([imgKey(bg)].filter(Boolean));
   const svcList = (Array.isArray(sc.services) ? sc.services : []).map((sv) => {
     const o = typeof sv === "string" ? { title: sv } : { ...sv };
+    if (o.image) o.image = uncrop(o.image);
     if (o.image) { const k = imgKey(o.image); if (usedImg.has(k)) o.image = ""; else usedImg.add(k); }
     return o;
   });
@@ -229,7 +231,7 @@ export default async function Site({ params }) {
 
       {/* HERO */}
       <section className="sm-hero">
-        <div className="bgimg" style={{ backgroundImage: bg ? `url(${bg})` : "linear-gradient(135deg,#1a1a1a,#333)" }} />
+        <div className="bgimg" style={{ backgroundImage: bg ? `url(${uncrop(bg)})` : "linear-gradient(135deg,#1a1a1a,#333)" }} />
         <div className="ov" />
         <div className="in">
           <span className="sm-eyebrow">{t.heroEyebrow}</span>
@@ -414,7 +416,7 @@ const SM_CSS = `
 .sm-lead{font-size:18px;line-height:1.75;color:#4a4038;max-width:62ch}
 .sm-svc{padding:0;overflow:hidden;align-self:start;transition:transform .2s,box-shadow .2s}
 .sm-svc:hover{transform:translateY(-3px);box-shadow:0 14px 34px rgba(120,80,60,.14)}
-.sm-svc-body img{height:190px}
+.sm-svc-body img{height:200px;object-position:center 20%}
 @keyframes smUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 .sm-hero .in>*{animation:smUp .7s both}.sm-hero .in>*:nth-child(2){animation-delay:.08s}.sm-hero .in>*:nth-child(3){animation-delay:.16s}.sm-hero .in>*:nth-child(4){animation-delay:.24s}
 .sm-sec{animation:smUp .6s both}
@@ -427,7 +429,7 @@ const SM_CSS = `
 .sm-svc-body{padding:0 26px 26px}
 .sm-svc-body img{width:100%;height:170px;object-fit:cover;border-radius:12px;margin-bottom:14px}
 .sm-card.sm-svc .sm-svc-body p{margin:0 0 26px;line-height:1.7}
-.sm-svc-body .sm-btn{display:inline-block;margin-top:4px}
+.sm-svc-body .sm-btn{display:inline-block;margin-top:4px;color:var(--accent-text,#fff)}
 .sm-band{background:var(--accent);color:var(--accent-text,#fff);text-align:center;padding:64px 22px}
 .sm-band .in{max-width:var(--maxw);margin:0 auto}
 .sm-band h2{font-size:clamp(26px,4vw,38px);margin:0 0 10px;font-weight:800}
