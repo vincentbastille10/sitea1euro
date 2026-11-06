@@ -252,9 +252,11 @@ export default async function Site({ params }) {
         <h2 className="sm-h2">{t.featH}</h2>
         <div className="sm-grid3">
           {Array.isArray(sc.services) && sc.services.length >= 3
-            ? sc.services.slice(0, 6).map((sv, i) => {
-                const o = typeof sv === "string" ? { title: sv } : sv;
-                const body = cutSentence(o.text) || (en
+            ? sc.services.slice(0, 6).map((sv, i, arr) => {
+                const o = typeof sv === "string" ? { title: sv } : { ...sv };
+                if (o.image && arr.filter((z) => z && z.image === o.image).length > 1) o.image = ""; // image répétée = pas d'image
+                const body = cutSentence(o.text) || (en ? `Ask our assistant about ${o.title}: details, availability or a quote, answered instantly.` : `Demandez à notre assistant pour ${o.title} : détails, disponibilités ou devis, réponse immédiate.`);
+                const _unused = (en
                   ? `${o.title} with ${nom}: a dedicated team that handles everything for you. Ask our assistant for details, availability or a quote.`
                   : `${o.title} avec ${nom} : une équipe dédiée qui s’occupe de tout pour vous. Demandez à notre assistant des détails, les disponibilités ou un devis.`);
                 return (
@@ -406,7 +408,12 @@ const SM_CSS = `
 .sm-kicker{color:var(--accent);font-weight:800;text-transform:uppercase;letter-spacing:.12em;font-size:13px}
 .sm-h2{font-size:clamp(26px,4vw,38px);font-weight:800;letter-spacing:-.02em;margin:8px 0 18px}
 .sm-lead{font-size:18px;line-height:1.75;color:#4a4038;max-width:62ch}
-.sm-svc{padding:0;overflow:hidden;align-self:start}
+.sm-svc{padding:0;overflow:hidden;align-self:start;transition:transform .2s,box-shadow .2s}
+.sm-svc:hover{transform:translateY(-3px);box-shadow:0 14px 34px rgba(120,80,60,.14)}
+.sm-svc-body img{height:190px}
+@keyframes smUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.sm-hero .in>*{animation:smUp .7s both}.sm-hero .in>*:nth-child(2){animation-delay:.08s}.sm-hero .in>*:nth-child(3){animation-delay:.16s}.sm-hero .in>*:nth-child(4){animation-delay:.24s}
+.sm-sec{animation:smUp .6s both}
 .sm-svc summary{display:flex;align-items:center;gap:14px;padding:22px 26px;cursor:pointer;list-style:none}
 .sm-svc summary::-webkit-details-marker{display:none}
 .sm-svc summary h3{margin:0;flex:1}

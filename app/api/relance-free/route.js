@@ -9,7 +9,7 @@ import { isUnsubscribed } from "../../../lib/unsubscribes-db";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
-const BATCH = 90;
+const BATCH = 25; // Mailgun bride mg.hypermusic.online à ~26 destinataires par fenêtre : on reste dessous
 
 let _p;
 const pool = () => (_p ||= new pg.Pool({
