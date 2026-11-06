@@ -426,7 +426,8 @@ const SM_CSS = `
 .sm-svc[open] .plus{transform:rotate(45deg)}
 .sm-svc-body{padding:0 26px 26px}
 .sm-svc-body img{width:100%;height:170px;object-fit:cover;border-radius:12px;margin-bottom:14px}
-.sm-svc-body p{margin:0 0 16px}
+.sm-card.sm-svc .sm-svc-body p{margin:0 0 26px;line-height:1.7}
+.sm-svc-body .sm-btn{display:inline-block;margin-top:4px}
 .sm-band{background:var(--accent);color:var(--accent-text,#fff);text-align:center;padding:64px 22px}
 .sm-band .in{max-width:var(--maxw);margin:0 auto}
 .sm-band h2{font-size:clamp(26px,4vw,38px);margin:0 0 10px;font-weight:800}
