@@ -49,6 +49,8 @@ export async function GET(req) {
   const key = new URL(req.url).searchParams.get("key");
   if (!process.env.CRON_SECRET || (auth !== `Bearer ${process.env.CRON_SECRET}` && key !== process.env.CRON_SECRET))
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  if (!process.env.UNSUBSCRIBE_SECRET || !process.env.MAILGUN_API_KEY)
+    return NextResponse.json({ ok: false, error: "UNSUBSCRIBE_SECRET ou MAILGUN_API_KEY manquant : aucun envoi" });
   const root = process.env.ROOT_DOMAIN || "spectramedia.online";
 
   const test = new URL(req.url).searchParams.get("test"); // ?test=adresse : 1 aperçu, sans toucher à la file
