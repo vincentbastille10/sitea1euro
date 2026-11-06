@@ -26,6 +26,15 @@ function cleanAbout(txt) {
   return keep.join("").trim();
 }
 
+// Coupe proprement à la dernière phrase entière (jamais au milieu d'un mot).
+function cutSentence(t, max = 380) {
+  t = (t || "").trim();
+  if (t.length <= max) return t;
+  const cut = t.slice(0, max);
+  const i = Math.max(cut.lastIndexOf(". "), cut.lastIndexOf("! "), cut.lastIndexOf("? "));
+  return i > 60 ? cut.slice(0, i + 1) : cut.replace(/\s+\S*$/, "") + "…";
+}
+
 function siteLang(site, metier) {
   return (site.lang === "en" || site.lang === "fr")
     ? site.lang
@@ -244,14 +253,14 @@ export default async function Site({ params }) {
           {Array.isArray(sc.services) && sc.services.length >= 3
             ? sc.services.slice(0, 6).map((sv, i) => {
                 const o = typeof sv === "string" ? { title: sv } : sv;
-                const body = o.text || (en
+                const body = cutSentence(o.text) || (en
                   ? `${o.title} with ${nom}: a dedicated team that handles everything for you. Ask our assistant for details, availability or a quote.`
                   : `${o.title} avec ${nom} : une équipe dédiée qui s’occupe de tout pour vous. Demandez à notre assistant des détails, les disponibilités ou un devis.`);
                 return (
                   <details className="sm-card sm-svc" key={i}>
                     <summary><span className="sm-ic"><Icon d={IC.bolt} /></span><h3>{o.title}</h3><span className="plus">+</span></summary>
                     <div className="sm-svc-body">
-                      {o.image && <img src={o.image} alt={o.title} loading="lazy" />}
+                      {o.image && <img src={o.image} alt={o.title} loading="lazy" referrerPolicy="no-referrer" />}
                       <p>{body}</p>
                       <a className="sm-btn" href="#betty">{en ? `Ask about ${o.title}` : `Poser une question sur ${o.title}`}</a>
                     </div>
@@ -396,7 +405,7 @@ const SM_CSS = `
 .sm-kicker{color:var(--accent);font-weight:800;text-transform:uppercase;letter-spacing:.12em;font-size:13px}
 .sm-h2{font-size:clamp(26px,4vw,38px);font-weight:800;letter-spacing:-.02em;margin:8px 0 18px}
 .sm-lead{font-size:18px;line-height:1.75;color:#4a4038;max-width:62ch}
-.sm-svc{padding:0;overflow:hidden}
+.sm-svc{padding:0;overflow:hidden;align-self:start}
 .sm-svc summary{display:flex;align-items:center;gap:14px;padding:22px 26px;cursor:pointer;list-style:none}
 .sm-svc summary::-webkit-details-marker{display:none}
 .sm-svc summary h3{margin:0;flex:1}
