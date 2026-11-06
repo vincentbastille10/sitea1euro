@@ -65,7 +65,7 @@ export async function POST(req, { params }) {
     const id = randomUUID();
     await createLead(id, slug, { name, email, message });
     const root = process.env.ROOT_DOMAIN || "spectramedia.online";
-    const url = `https://${root}/lead/${id}`;
+    const url = `https://${slug}.${root}/lead/${id}`;
     const fr = site.lang !== "en";
     const price = fr ? "5 €" : "$5";
     const subject = fr ? "Betty a capté un nouveau lead pour vous" : "Betty captured a new lead for you";
