@@ -158,6 +158,7 @@ export default async function Site({ params }) {
   // L'image scrapée du site d'origine (og:image) est souvent un logo ou une capture d'écran :
   // illisible en fond de hero. On la remplace par une photo Pexels du métier.
   try {
+    if (!bg) bg = await generateHeroImageUrl(site.metier, nom, ville, lang, site.metier_label, site.brand_color);
     const own = new URL(site.site_url || "").hostname.replace(/^www\./, "");
     if (bg && own && new URL(bg).hostname.replace(/^www\./, "").endsWith(own)) {
       bg = await generateHeroImageUrl(site.metier, nom, ville, lang, site.metier_label, site.brand_color);
